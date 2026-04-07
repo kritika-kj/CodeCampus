@@ -1,0 +1,111 @@
+/* Centers the content on the screen */
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #121212;
+    font-family: sans-serif;
+}
+
+/* Constrains the reusable Card so it doesn't stretch too wide on the login screen */
+.login-container .campus-card {
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    margin: 0 20px; /* Adds a bit of space on mobile screens */
+}
+
+/* Makes the title a bit bigger just for the login screen */
+.login-container .card-header h3 {
+    font-size: 1.5rem;
+}
+
+.login-subtitle {
+    color: #aaaaaa;
+    margin-top: -10px;
+    margin-bottom: 25px;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.error-message {
+    background-color: #ff4d4d;
+    color: white;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    font-size: 0.85rem;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.input-group label {
+    margin-bottom: 5px;
+    font-size: 0.85rem;
+    color: #cccccc;
+}
+
+.input-group input {
+    padding: 10px;
+    background-color: #2d2d2d;
+    border: 1px solid #444;
+    border-radius: 4px;
+    color: white;
+    font-size: 1rem;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: #4af626;
+}
+
+.login-btn {
+    margin-top: 10px;
+    padding: 12px;
+    background-color: #0e639c;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.login-btn:hover {
+    background-color: #1177bb;
+}
+
+.login-btn:disabled {
+    background-color: #555;
+    cursor: not-allowed;
+}
+
+.toggle-text {
+    margin-top: 20px;
+    font-size: 0.85rem;
+    color: #aaaaaa;
+}
+
+.toggle-link {
+    color: #4af626;
+    cursor: pointer;
+    font-weight: bold;
+    text-decoration: underline;
+    transition: color 0.2s;
+}
+
+.toggle-link:hover {
+    color: #ffffff;
+}
