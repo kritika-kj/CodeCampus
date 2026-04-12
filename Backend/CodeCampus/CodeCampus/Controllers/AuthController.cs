@@ -1,9 +1,15 @@
+<<<<<<< HEAD
 ﻿using CodeCampus.Models;
 using CodeCampus.Data;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BCrypt.Net;
+=======
+﻿//using CodeCampus.Models;
+using Microsoft.AspNetCore.Identity.Data;
+using Microsoft.AspNetCore.Mvc;
+>>>>>>> d2f8a62f9794f42146d7dd76e975dbf574532772
 
 namespace CodeCampus.Controllers
 {
@@ -11,6 +17,7 @@ namespace CodeCampus.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
+<<<<<<< HEAD
         private readonly AppDbContext _context;
 
         public AuthController(AppDbContext context)
@@ -54,6 +61,29 @@ namespace CodeCampus.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(new { message = "Registration successful", role = newUser.Role });
+=======
+        [HttpPost("Login")]
+        public IActionResult Login([FromBody] LoginRequest request)
+        {
+            // TEMPORARY: Hardcoded logic to test the React connection
+            // Later, this will search your SQL database!
+
+            if (request.Email == "admin@codecampus.com" && request.Password == "admin123")
+            {
+                return Ok(new { message = "Login successful", role = "Admin" });
+            }
+            if (request.Email == "mod@codecampus.com" && request.Password == "mod123")
+            {
+                return Ok(new { message = "Login successful", role = "Moderator" });
+            }
+            if (request.Email == "contestant@example.com" && request.Password == "password")
+            {
+                return Ok(new { message = "Login successful", role = "Contestant" });
+            }
+
+            // If no match is found, kick them out
+            return Unauthorized(new { message = "Invalid email or password." });
+>>>>>>> d2f8a62f9794f42146d7dd76e975dbf574532772
         }
     }
 }

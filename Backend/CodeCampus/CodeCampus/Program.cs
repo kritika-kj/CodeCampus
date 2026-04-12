@@ -1,8 +1,12 @@
+<<<<<<< HEAD
 using Microsoft.EntityFrameworkCore;
 using CodeCampus.Data;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+=======
+var builder = WebApplication.CreateBuilder(args);
+>>>>>>> d2f8a62f9794f42146d7dd76e975dbf574532772
 
 // Add services to the container.
 builder.Services.AddControllers();
