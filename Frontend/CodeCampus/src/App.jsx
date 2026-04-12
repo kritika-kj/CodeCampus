@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import CodeWorkspace from './Pages/CodeWorkSpace'; // Updated path
 import Login from './Pages/Login';                 // Updated path
-
+import DashBoard from './Pages/DashBoard';
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userRole, setUserRole] = useState(''); // Contestant or Moderator
 
-  const handleLoginSuccess = () => {
-      setIsAuthenticated(true);
+  const handleLoginSuccess = (role) => {
+    setUserRole(role);
+    setIsAuthenticated(true);
   };
 
   return (
@@ -14,7 +16,7 @@ function App() {
       {!isAuthenticated ? (
           <Login onLoginSuccess={handleLoginSuccess} />
       ) : (
-          <CodeWorkspace />
+          <DashBoard role={userRole} />
       )}
     </div>
   );
