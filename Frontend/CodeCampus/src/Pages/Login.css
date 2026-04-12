@@ -1,111 +1,147 @@
-/* Centers the content on the screen */
+/* 1. The Main Page Container */
 .login-container {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: #121212;
+    width: 100vw;
+    background-color: #0a0a0a; /* Darkest charcoal, close to black */
     font-family: sans-serif;
+    overflow: hidden; /* CRITICAL: Prevent scrollbars during animation */
+    position: relative;
+    z-index: 1;
 }
 
-/* Constrains the reusable Card so it doesn't stretch too wide on the login screen */
-.login-container .campus-card {
+/* 2. The Login Card Wrapper (Protects the card from being blurred) */
+.login-card-wrapper {
+    z-index: 10; /* Keeps the form on top */
+    text-align: center;
+}
+
+/* Include your existing styling for subtitle, form, and sign-up text... */
+
+/* --- CRISP VECTOR BACKGROUND STYLING (The solution) --- */
+.vector-background {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
-    max-width: 400px;
-    text-align: center;
-    margin: 0 20px; /* Adds a bit of space on mobile screens */
+    height: 100%;
+    z-index: 1; /* Sits behind the card */
+    pointer-events: none; /* Stops the background from blocking clicks */
 }
 
-/* Makes the title a bit bigger just for the login screen */
-.login-container .card-header h3 {
-    font-size: 1.5rem;
+/* Shape 1: The solid central orb shape (The Horizon) */
+.solid-center-orb {
+    position: absolute;
+    bottom: -30vw; /* Push down to form a horizon */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 110vw; /* Larger than screen for overlap */
+    height: 110vw;
+    border-radius: 50%;
+    
+    /* Using a very dark green gradient to simulate depth, but not blurry */
+    background: radial-gradient(circle, #0c2d0c 0%, rgba(12, 45, 12, 0.4) 60%, transparent 90%);
+    border-top: 2px solid #1a73e8; /* Crisp border that matches video structure, but is dark */
+    
+    opacity: 0.6;
+    z-index: 2;
 }
 
-.login-subtitle {
-    color: #aaaaaa;
-    margin-top: -10px;
-    margin-bottom: 25px;
-    font-size: 0.9rem;
-    text-align: center;
+/* Base style for the concentric rings */
+.orbital-ring {
+    position: absolute;
+    bottom: -30vw; /* Positioned relative to the orb horizon */
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    
+    /* These are the crisp, thin concentric lines from your reference */
+    border: 1.5px solid rgba(74, 246, 38, 0.1); /* Thin green, very transparent */
+    
+    z-index: 1; /* Rings are *behind* the solid dome horizon */
 }
 
-.error-message {
-    background-color: #ff4d4d;
-    color: white;
-    padding: 10px;
-    border-radius: 4px;
-    margin-bottom: 15px;
-    font-size: 0.85rem;
+/* Specific ring diameters for perfect concentric overlap */
+.ring-1 { width: 120vw; height: 120vw; }
+.ring-2 { width: 130vw; height: 130vw; opacity: 0.8; }
+.ring-3 { width: 140vw; height: 140vw; opacity: 0.6; }
+
+/* 3. The Floating UI Badges (Replicating the video complexity) */
+.vector-badge {
+    position: absolute;
+    
+    /* This creates that frosted glass effect (slight blur behind card only, not shape itself) */
+    background: rgba(30, 30, 30, 0.7); 
+    backdrop-filter: blur(10px);
+    
+    border: 1px solid rgba(255, 255, 255, 0.1); /* Thin light border */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5); /* Deep shadow for lift */
+    border-radius: 8px; /* Matching video style */
+    z-index: 3; /* Widgets are on top of the dome and rings */
+    
+    /* Add a slow, gentle vertical floating animation */
+    animation: gentleFloat 8s infinite alternate ease-in-out;
 }
 
-.login-form {
+/* Left Badge: Text Cycling Widget */
+.badge-left {
     display: flex;
-    flex-direction: column;
-    gap: 15px;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: white; /* Text is white for contrast */
+    top: 45%;
+    left: 15%;
+    animation-delay: -2s; /* Desync the float */
 }
 
-.input-group {
+/* Recreating the text cycling logic using a CSS pseudo-element animation */
+.cycling-text::after {
+    content: "APPROVING"; /* Base content */
+    display: inline-block;
+    color: #4af626; /* Making the text neon green */
+    width: max-content;
+    
+    /* Replicate the animation that changes the content text */
+    animation: cycleStatusText 12s infinite;
+}
+
+/* The neon green dot, integrated cleanly with video structure */
+.badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #4af626;
+    display: inline-block;
+}
+
+/* Right Badge: The simple document icon circular card */
+.badge-right {
     display: flex;
-    flex-direction: column;
-    text-align: left;
-}
-
-.input-group label {
-    margin-bottom: 5px;
-    font-size: 0.85rem;
-    color: #cccccc;
-}
-
-.input-group input {
-    padding: 10px;
-    background-color: #2d2d2d;
-    border: 1px solid #444;
-    border-radius: 4px;
-    color: white;
-    font-size: 1rem;
-}
-
-.input-group input:focus {
-    outline: none;
-    border-color: #4af626;
-}
-
-.login-btn {
-    margin-top: 10px;
+    justify-content: center;
+    align-items: center;
     padding: 12px;
-    background-color: #0e639c;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 1rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.2s;
+    border-radius: 50%; /* It's a circle, matching video */
+    top: 50%;
+    right: 15%;
 }
 
-.login-btn:hover {
-    background-color: #1177bb;
+/* --- THE NEW ANIMATIONS (Matching video logic) --- */
+
+/* 1. Gentle Vertical Float */
+@keyframes gentleFloat {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-15px); }
 }
 
-.login-btn:disabled {
-    background-color: #555;
-    cursor: not-allowed;
-}
-
-.toggle-text {
-    margin-top: 20px;
-    font-size: 0.85rem;
-    color: #aaaaaa;
-}
-
-.toggle-link {
-    color: #4af626;
-    cursor: pointer;
-    font-weight: bold;
-    text-decoration: underline;
-    transition: color 0.2s;
-}
-
-.toggle-link:hover {
-    color: #ffffff;
+/* 2. Text Content Cycle (APPROVING -> MAKING -> CHECKING) */
+/* We animate the 'content' property of the cycling-text::after pseudo-element */
+@keyframes cycleStatusText {
+    0%, 30% { content: "APPROVING"; }
+    33.33%, 63.33% { content: "MAKING"; }
+    66.66%, 100% { content: "CHECKING"; }
 }

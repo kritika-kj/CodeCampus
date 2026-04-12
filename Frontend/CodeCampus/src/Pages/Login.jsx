@@ -1,135 +1,61 @@
-import React, { useState } from 'react';
-import './Login.css';
-import Card from '../Components/Card'; 
+import React from 'react';
+import Card from '../Components/Card'; // Ensure your path is correct
+import './Login.css'; // Importing our enhanced CSS
 
-function Login({ onLoginSuccess }) {
-    // State to toggle between Login and Sign Up
-    const [isLoginMode, setIsLoginMode] = useState(true);
-
-    // Form states
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    
-    // UI states
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState('');
-
-    const toggleMode = () => {
-        setIsLoginMode(!isLoginMode);
-        setError(''); // Clear errors when switching modes
-    };
-
-    const handleSubmit = async (e) => {
+const Login = ({ onLoginSuccess }) => {
+    const handleLogin = (e) => {
         e.preventDefault();
-        setIsLoading(true);
-        setError('');
-
-        // Simulate API call to your ASP.NET backend
+        // Simulate a 1-second login delay
         setTimeout(() => {
-            if (isLoginMode) {
-                // --- SIGN IN LOGIC ---
-                if (email && password) {
-                    onLoginSuccess(); 
-                } else {
-                    setError('Please enter both email and password.');
-                    setIsLoading(false);
-                }
-            } else {
-                // --- SIGN UP LOGIC ---
-                if (password !== confirmPassword) {
-                    setError('Passwords do not match.');
-                    setIsLoading(false);
-                    return;
-                }
-                if (name && email && password) {
-                    // In a real app, this creates the user in the DB, then logs them in
-                    onLoginSuccess(); 
-                } else {
-                    setError('Please fill out all fields.');
-                    setIsLoading(false);
-                }
-            }
+            onLoginSuccess();
         }, 1000);
     };
 
     return (
         <div className="login-container">
-            <Card title={isLoginMode ? 'Welcome Back' : 'Join CodeCampus'}>
+            
+            {/* --- THE CRISP ORBITAL BACKGROUND (Translated from the video) --- */}
+            <div className="vector-background">
+                {/* 1. The main centered orb shape (The horizon) */}
+                <div className="solid-center-orb"></div>
                 
-                <p className="login-subtitle">
-                    {isLoginMode ? 'Sign in to access the arena' : 'Create an account to start coding'}
-                </p>
-
-                {error && <div className="error-message">{error}</div>}
-
-                <form onSubmit={handleSubmit} className="login-form">
-                    
-                    {!isLoginMode && (
-                        <div className="input-group">
-                            <label>Full Name</label>
-                            <input 
-                                type="text" 
-                                value={name} 
-                                onChange={(e) => setName(e.target.value)} 
-                                placeholder="Username"
-                                required 
-                            />
-                        </div>
-                    )}
-
-                    <div className="input-group">
-                        <label>Email</label>
-                        <input 
-                            type="email" 
-                            value={email} 
-                            onChange={(e) => setEmail(e.target.value)} 
-                            placeholder="contestant@example.com"
-                            required 
-                        />
-                    </div>
-
-                    <div className="input-group">
-                        <label>Password</label>
-                        <input 
-                            type="password" 
-                            value={password} 
-                            onChange={(e) => setPassword(e.target.value)} 
-                            placeholder="••••••••"
-                            required 
-                        />
-                    </div>
-
-                    {!isLoginMode && (
-                        <div className="input-group">
-                            <label>Confirm Password</label>
-                            <input 
-                                type="password" 
-                                value={confirmPassword} 
-                                onChange={(e) => setConfirmPassword(e.target.value)} 
-                                placeholder="••••••••"
-                                required 
-                            />
-                        </div>
-                    )}
-
-                    <button type="submit" disabled={isLoading} className="login-btn">
-                        {isLoading 
-                            ? (isLoginMode ? 'Authenticating...' : 'Creating Account...') 
-                            : (isLoginMode ? 'Enter Arena' : 'Sign Up')}
-                    </button>
-                </form>
-
-                <div className="toggle-text">
-                    {isLoginMode ? "Don't have an account? " : "Already have an account? "}
-                    <span className="toggle-link" onClick={toggleMode}>
-                        {isLoginMode ? "Sign up here" : "Sign in here"}
-                    </span>
+                {/* 2. The concentric orbital rings */}
+                <div className="orbital-ring ring-3"></div>
+                <div className="orbital-ring ring-2"></div>
+                <div className="orbital-ring ring-1"></div>
+                
+                {/* 3. The floating UI badges (Stylized in Hacker Green) */}
+                <div className="vector-badge badge-left">
+                    <span className="badge-dot"></span> 
+                    {/* The text cycles: APPROVING, MAKING, CHECKING via CSS */}
+                    <span className="cycling-text"></span>
                 </div>
-            </Card>
+                <div className="vector-badge badge-right">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4af626" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                </div>
+            </div>
+            {/* --- END BACKGROUND --- */}
+
+            {/* Existing Login Card Content (centered) */}
+            <div className="login-card-wrapper">
+                <Card title="Enter The Arena">
+                    <p className="login-subtitle">Authenticate to access your workspace.</p>
+                    <form onSubmit={handleLogin} className="login-form">
+                        <div className="form-group">
+                            <label htmlFor="email">Email</label>
+                            <input type="email" id="email" placeholder="contestant@example.com" />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="password">Password</label>
+                            <input type="password" id="password" placeholder="********" />
+                        </div>
+                        <button type="submit" className="login-btn">Initialize Link</button>
+                    </form>
+                    <p className="signup-text">New contestant? <a href="#">Register here</a></p>
+                </Card>
+            </div>
         </div>
     );
-}
+};
 
 export default Login;

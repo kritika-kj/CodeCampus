@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-// import CodeWorkspace from './Pages/CodeWorkspace'; // Updated path
+import CodeWorkspace from './Pages/CodeWorkSpace'; // Updated path
 import Login from './Pages/Login';                 // Updated path
 
 function App() {
