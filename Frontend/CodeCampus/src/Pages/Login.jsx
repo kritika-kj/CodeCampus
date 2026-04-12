@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './Login.css';
 import Card from '../Components/Card'; 
+import LoginBg from '../Assets/LoginVideo.mp4';
 
 function Login({ onLoginSuccess }) {
     // State to toggle between Login and Sign Up
@@ -26,16 +27,31 @@ function Login({ onLoginSuccess }) {
         setIsLoading(true);
         setError('');
 
-        // Simulate API call to your ASP.NET backend
-        setTimeout(() => {
             if (isLoginMode) {
-                // --- SIGN IN LOGIC ---
-                if (email && password) {
-                    onLoginSuccess(); 
+                // --- LOGIN LOGIC ---
+                try {
+                const response = await fetch('http://localhost:5174/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, password: password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Success! Pass the role back to App.jsx
+                    console.log("Logged in as:", data.role);
+                    onLoginSuccess(data.role); 
                 } else {
-                    setError('Please enter both email and password.');
+                    // Failed login (Unauthorized)
+                    setError(data.message || 'Invalid credentials');
                     setIsLoading(false);
                 }
+            } catch (err) {
+                console.error("Connection error:", err);
+                setError('Failed to connect to the server.');
+                setIsLoading(false);
+            }
             } else {
                 // --- SIGN UP LOGIC ---
                 if (password !== confirmPassword) {
@@ -45,17 +61,31 @@ function Login({ onLoginSuccess }) {
                 }
                 if (name && email && password) {
                     // In a real app, this creates the user in the DB, then logs them in
-                    onLoginSuccess(); 
+                    onLoginSuccess('Contestant'); // Default to contestant for new sign-ups
+                    setIsLoading(false);
                 } else {
                     setError('Please fill out all fields.');
                     setIsLoading(false);
                 }
             }
-        }, 1000);
     };
 
     return (
+       
         <div className="login-container">
+            <div className="video-background-wrapper">
+                {/* CRITICAL ATTRIBUTES: 
+                  autoPlay: Starts immediately
+                  loop: Never stops
+                  muted & playsInline: REQUIRED by browsers, otherwise autoplay is blocked!
+                */}
+                <video autoPlay loop muted playsInline className="bg-video">
+                    <source src={LoginBg} type="video/mp4" />
+                </video>
+                
+                {/* This darkens the video so your form is still easy to read */}
+                <div className="video-overlay"></div>
+            </div>
             <Card title={isLoginMode ? 'Welcome Back' : 'Join CodeCampus'}>
                 
                 <p className="login-subtitle">
