@@ -1,27 +1,18 @@
 import React from 'react';
-// import './DashBoard.css';
-import DashBoardOption from '../Components/DashBoardOption';
+import { Outlet } from 'react-router-dom';
 
-function DashBoard({role}) {
+function DashBoard({ role, onLogout }) {
   return (
-    <div className="dashboard-container">
-      <h1>Welcome to the Dashboard, {role}!</h1>
-      <div className="options-container">
-        {role === 'Contestant' ? (
-            <>
-                <DashBoardOption text="Join Contest" onClick={() => alert('Joining contest...')} />
-                <DashBoardOption text="View Submissions" onClick={() => alert('Viewing submissions...')} />
-            </>
-        ) : (
-            <>
-                <DashBoardOption text="Manage Challenges" onClick={() => alert('Manage Challenges...')} />
-                <DashBoardOption text="Manage Contests" onClick={() => alert('Managing contests...')} />
-            </>
-        )}
+    <div className="dashboard-container" style={{ padding: '20px', maxWidth: '1000px', margin: '0 auto' }}>
+      <div className="dashboard-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', paddingBottom: '10px', borderBottom: '1px solid #eee' }}>
+        <h1>CodeCampus | {role} Panel</h1>
+        <button onClick={onLogout} style={{ padding: '8px 16px', cursor: 'pointer', backgroundColor: '#ff4d4f', color: 'white', border: 'none', borderRadius: '4px' }}>
+          Sign Out
+        </button>
       </div>
+      <Outlet />
     </div>
-
   )
 }
 
-export default DashBoard
+export default DashBoard;

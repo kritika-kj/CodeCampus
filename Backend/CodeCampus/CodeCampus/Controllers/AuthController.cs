@@ -1,15 +1,13 @@
-<<<<<<< HEAD
-﻿using CodeCampus.Models;
+using BCrypt.Net;
 using CodeCampus.Data;
+using CodeCampus.Models;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using BCrypt.Net;
-=======
-﻿//using CodeCampus.Models;
-using Microsoft.AspNetCore.Identity.Data;
-using Microsoft.AspNetCore.Mvc;
->>>>>>> d2f8a62f9794f42146d7dd76e975dbf574532772
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace CodeCampus.Controllers
 {
@@ -17,7 +15,6 @@ namespace CodeCampus.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-<<<<<<< HEAD
         private readonly AppDbContext _context;
 
         public AuthController(AppDbContext context)
@@ -27,6 +24,7 @@ namespace CodeCampus.Controllers
         [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] Models.LoginRequest request)
         {
+
             var standardizedEmail = request.Email.ToLower().Trim();
 
 
@@ -35,8 +33,9 @@ namespace CodeCampus.Controllers
             {
                 return Unauthorized(new { message = "Invalid email or password." });
             }
+            var token = GenerateJwtToken(user);
 
-            return Ok(new { message = "Login successful", role = user.Role });
+            return Ok(new { message = "Login successful", token = token, role = user.Role });
         }
 
         [HttpPost("register")]
@@ -61,29 +60,31 @@ namespace CodeCampus.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(new { message = "Registration successful", role = newUser.Role });
-=======
-        [HttpPost("Login")]
-        public IActionResult Login([FromBody] LoginRequest request)
+        }
+        private static string GenerateJwtToken(User user)
         {
-            // TEMPORARY: Hardcoded logic to test the React connection
-            // Later, this will search your SQL database!
+            // 1. Get the secret key from appsettings
+            var jwtKey = "ThisIsMySuperSecretCodeCampusKeyThatIsLongEnoughToWork12345!"; // Match your appsettings exact string
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
+            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            if (request.Email == "admin@codecampus.com" && request.Password == "admin123")
+            // 2. Put the user's specific data ON the badge
+            var claims = new[]
             {
-                return Ok(new { message = "Login successful", role = "Admin" });
-            }
-            if (request.Email == "mod@codecampus.com" && request.Password == "mod123")
-            {
-                return Ok(new { message = "Login successful", role = "Moderator" });
-            }
-            if (request.Email == "contestant@example.com" && request.Password == "password")
-            {
-                return Ok(new { message = "Login successful", role = "Contestant" });
-            }
+        new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+        new Claim("role", user.Role), // We bake their role right into the token!
+        new Claim("userId", user.Id.ToString())
+    };
 
-            // If no match is found, kick them out
-            return Unauthorized(new { message = "Invalid email or password." });
->>>>>>> d2f8a62f9794f42146d7dd76e975dbf574532772
+            // 3. Print the token (expires in 2 hours)
+            var token = new JwtSecurityToken(
+                issuer: "CodeCampusAPI",
+                audience: "CodeCampusReactApp",
+                claims: claims,
+                expires: DateTime.Now.AddHours(2),
+                signingCredentials: credentials);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }

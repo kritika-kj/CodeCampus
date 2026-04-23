@@ -39,8 +39,8 @@ function Login({ onLoginSuccess }) {
                 const data = await response.json();
 
                 if (response.ok) {
-                    // Success! Pass the role back to App.jsx
-                    console.log("Logged in as:", data.role);
+                    sessionStorage.setItem('codeCampusToken', data.token);
+                    sessionStorage.setItem('userRole', data.role);
                     onLoginSuccess(data.role); 
                 } else {
                     // Failed login (Unauthorized)

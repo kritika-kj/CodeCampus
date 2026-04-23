@@ -1,4 +1,5 @@
 import React from 'react'
+import './DashBoardOption.css'
 
 function DashBoardOption({text, onClick}) {
   return (
