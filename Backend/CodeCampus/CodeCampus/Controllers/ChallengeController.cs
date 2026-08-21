@@ -30,6 +30,7 @@ namespace CodeCampus.Controllers
             // 3. Send a success message back to React
             return Ok(new { message = "Challenge published successfully!", id = newChallenge.Id });
         }
+
         // GET: api/challenge
         [HttpGet]
         public async Task<IActionResult> GetAllChallenges()
@@ -40,6 +41,24 @@ namespace CodeCampus.Controllers
                                            .ToListAsync();
 
             return Ok(challenges);
+        }
+
+        // --- ADDED THIS NEW ENDPOINT ---
+        // GET: api/challenge/5
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetChallenge(int id)
+        {
+            // 1. Find the specific challenge by its ID in the database
+            var challenge = await _context.Challenges.FindAsync(id);
+
+            // 2. If it doesn't exist, tell React it's missing
+            if (challenge == null)
+            {
+                return NotFound();
+            }
+
+            // 3. If found, send the data over to the Monaco Editor!
+            return Ok(challenge);
         }
     }
 }
