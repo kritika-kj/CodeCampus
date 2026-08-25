@@ -9,10 +9,11 @@ import ContestManager from './Components/ContestManager';
 import JoinContest from './Components/JoinContest';
 // import { BrowserRouter, Routes } from 'react-router-dom';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import UserManagement from './Components/UserManagement';
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState(''); // Contestant or Moderator
-
+  const [userRole, setUserRole] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
     const savedToken = sessionStorage.getItem('codeCampusToken');
     const savedRole = sessionStorage.getItem('userRole');
@@ -22,7 +23,8 @@ function App() {
       setIsAuthenticated(true);
       setUserRole(savedRole);
     }
-  }, []); // The empty array [] means this only runs on the first load
+    setIsLoading(false);
+  }, []);
 
   const handleLoginSuccess = (role) => {
     setUserRole(role);
@@ -35,6 +37,9 @@ function App() {
     setIsAuthenticated(false);
     setUserRole(null);
   };
+  if (isLoading) {
+    return <div>Loading CodeCampus...</div>; 
+  }
 
   return (
     <BrowserRouter>
@@ -46,6 +51,10 @@ function App() {
           <Route path="challenges" element={<ChallengeManager />} />    
           <Route path="contests" element={<ContestManager />} />
           <Route path="join" element={<JoinContest />} />
+          <Route path="settings" element = {
+            userRole === "Admin"? <UserManagement/>: <Navigate to ="/dashboard" replace />
+          }
+          />
         </Route>
         <Route path="/workspace/:id" element={
           isAuthenticated ? <CodeWorkspace /> : <Navigate to="/login" />

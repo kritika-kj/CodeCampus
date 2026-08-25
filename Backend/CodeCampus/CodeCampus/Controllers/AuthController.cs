@@ -72,7 +72,7 @@ namespace CodeCampus.Controllers
             var claims = new[]
             {
         new Claim(JwtRegisteredClaimNames.Sub, user.Email),
-        new Claim("role", user.Role), // We bake their role right into the token!
+        new Claim(ClaimTypes.Role, user.Role), // We bake their role right into the token!
         new Claim("userId", user.Id.ToString())
     };
 

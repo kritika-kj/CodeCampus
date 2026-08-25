@@ -1,16 +1,19 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashBoardOption from '../Components/DashBoardOption';
+import './Dashboard.css';
 
 function DashboardMenu({ role }) {
   const navigate = useNavigate();
 
   return (
-    <div className="options-container" style={{ display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '60px', /* Even wider gap so they don't touch */
-        width: '100%', /* Let them grow as wide as the Dashboard allows */
-        margin: '80px auto 0 auto'}}>
+    <div className="options-container"
+    //  style={{ display: 'grid', 
+    //     gridTemplateColumns: '1fr 1fr', 
+    //     gap: '60px',
+    //     width: '100%',
+    //     margin: '80px auto 0 auto'}}
+        >
 
       {role === 'Contestant' && (
           <>
@@ -32,8 +35,8 @@ function DashboardMenu({ role }) {
               <DashBoardOption text="Manage Challenges" onClick={() => navigate('/dashboard/challenges')} />
               <DashBoardOption text="Review Submissions" onClick={() => navigate('/dashboard/review')} />
               
-              <DashBoardOption text="Manage Users" onClick={() => navigate('/dashboard/users')} />
-              <DashBoardOption text="System Settings" onClick={() => navigate('/dashboard/settings')} />
+              <DashBoardOption text="Manage Users" onClick={() => navigate('/dashboard/settings')} />
+              {/* <DashBoardOption text="System Settings" onClick={() => navigate('/dashboard/settings')} /> */}
           </>
       )}
       

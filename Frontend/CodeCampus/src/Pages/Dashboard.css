@@ -1,0 +1,178 @@
+/* =========================================
+   1. Base Body & Layout Styling
+   ========================================= */
+body {
+    background-color: #050505; /* Deep black to let your particle background pop */
+    color: #e2e8f0; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+}
+
+.dashboard-container {
+    /* Layers a dark tint over your image so the header/tiles stay readable */
+    background-image: url('../assets/button-bg.png');
+    background-size: cover;
+    background-position: center;
+    
+    position: relative;
+    z-index: 10;
+    
+    min-height: calc(100vh - 80px);
+    width: 90%; 
+    max-width: 1300px; 
+    margin: 40px auto; 
+    padding: 40px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.9); 
+    border-radius: 12px;
+    border: 1px solid rgba(74, 222, 128, 0.3); /* Glowing green edge */
+}
+
+/* =========================================
+   2. Header & Sign Out Button
+   ========================================= */
+.dashboard-header {
+    border-bottom: 1px solid #333 !important;
+}
+
+.dashboard-header h1 {
+    margin: 0;
+    /* Matches the neon green "Welcome Back" text */
+    color: #4ade80; 
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.dashboard-header button {
+    /* Matches the blue "Enter Arena" button */
+    background-color: #1a73e8 !important; 
+    color: white !important;
+    transition: background-color 0.2s ease-in-out;
+    font-weight: 600;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+.dashboard-header button:hover {
+    background-color: #155cb0 !important; 
+}
+
+/* =========================================
+   3. Grid Layout & Sleek Dark Tiles
+   ========================================= */
+.options-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 40px;
+    margin-top: 40px;
+    width: 100%;
+}
+
+.options-container > * {
+    /* Semi-transparent dark glass panel */
+    background: rgba(15, 23, 42, 0.65); 
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    
+    color: #e2e8f0;
+    border-radius: 10px;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 220px; 
+    width: 100%; 
+    
+    cursor: pointer;
+    font-size: 22px; 
+    font-weight: 600;
+    
+    /* Subtle border matching the green accents in your background */
+    border: 1px solid rgba(74, 222, 128, 0.25);
+    text-decoration: none;
+    text-align: center;
+    padding: 20px;
+}
+
+/* Tile Hover Effect - Neon Green Glow & Lift */
+.options-container > *:hover {
+    transform: translateY(-6px);
+    
+    /* Slightly lighter glass on hover */
+    background: rgba(30, 41, 59, 0.85); 
+    
+    /* Bright neon green border and text glow */
+    border-color: #4ade80;
+    color: #4ade80; 
+    box-shadow: 0 12px 30px rgba(74, 222, 128, 0.25);
+}
+
+/* =========================================
+   4. User Management Table Styling
+   ========================================= */
+.content-card {
+    background-color: transparent;
+    padding: 0;
+    box-shadow: none;
+    margin-top: 30px;
+}
+
+.content-card h2 {
+    color: #e2e8f0;
+    border-bottom: 1px solid #333;
+    padding-bottom: 10px;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    margin-top: 20px;
+}
+
+.data-table th {
+    background-color: #141414; 
+    color: #4ade80; 
+    border-bottom: 2px solid #4ade80;
+    padding: 15px;
+}
+
+.data-table td {
+    border-bottom: 1px solid #333;
+    color: #e2e8f0;
+    padding: 15px;
+}
+
+.data-table tr:hover {
+    background-color: #2b303b; 
+}
+
+.role-select {
+    background-color: #2b303b;
+    color: white;
+    border: 1px solid #3f4452;
+    padding: 8px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.role-select:focus {
+    outline: none;
+    border-color: #4ade80;
+}
+
+.role-badge-admin {
+    color: #4ade80;
+    font-weight: bold;
+    background-color: rgba(74, 222, 128, 0.1);
+    padding: 6px 12px;
+    border-radius: 12px;
+}
+
+.role-badge-contestant {
+    color: #a0aec0;
+}

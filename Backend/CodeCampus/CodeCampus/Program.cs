@@ -50,12 +50,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("AllowReactApp");
 app.UseAuthentication();
 app.UseAuthorization();
 
-// --- 2. ACTIVATE THE CORS VIP PASS ---
-// CRITICAL: This must go BEFORE app.MapControllers()!
-app.UseCors("AllowReactApp");
+
 
 app.MapControllers();
 
