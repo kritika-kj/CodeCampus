@@ -7,6 +7,9 @@ import DashboardMenu from './Pages/DashBoardMenu';
 import ChallengeManager from './Components/ChallengeManager'; 
 import ContestManager from './Components/ContestManager';
 import JoinContest from './Components/JoinContest';
+
+import ContestHub from './Pages/ContestHub'; 
+import ContestResults from './Pages/ContestResults';
 // import { BrowserRouter, Routes } from 'react-router-dom';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import UserManagement from './Components/UserManagement';
@@ -56,8 +59,14 @@ function App() {
           }
           />
         </Route>
-        <Route path="/workspace/:id" element={
+        <Route path="/contest/:contestId" element={
+          isAuthenticated ? <ContestHub /> : <Navigate to="/login" />
+        } />   
+        <Route path="/workspace/:contestId/:challengeId" element={
           isAuthenticated ? <CodeWorkspace /> : <Navigate to="/login" />
+        } />       
+        <Route path="/results/:contestId" element={
+          isAuthenticated ? <ContestResults /> : <Navigate to="/login" />
         } />
       </Routes>
     </BrowserRouter>

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 function JoinContest() {
     const navigate = useNavigate();
-    
+
     const [activeContests, setActiveContests] = useState([]);
     const [selectedContest, setSelectedContest] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -28,8 +28,8 @@ function JoinContest() {
 
     return (
         <div style={{ maxWidth: '900px', margin: '0 auto', padding: '20px' }}>
-            <button 
-                onClick={() => selectedContest ? setSelectedContest(null) : navigate('/dashboard')} 
+            <button
+                onClick={() => selectedContest ? setSelectedContest(null) : navigate('/dashboard')}
                 style={{ marginBottom: '20px', background: 'none', border: 'none', color: '#007bff', cursor: 'pointer', textDecoration: 'underline' }}
             >
                 ← {selectedContest ? 'Back to Contests' : 'Back to Dashboard Menu'}
@@ -41,7 +41,7 @@ function JoinContest() {
             {!selectedContest && (
                 <>
                     <h2 style={{ marginBottom: '20px' }}>Available Contests</h2>
-                    
+
                     {isLoading ? (
                         <p>Loading the arena...</p>
                     ) : activeContests.length === 0 ? (
@@ -60,8 +60,14 @@ function JoinContest() {
                                     <p style={{ color: '#64748b', marginBottom: '25px', flex: 1 }}>
                                         This contest contains <strong>{contest.challengeIds.split(',').length}</strong> coding challenges.
                                     </p>
-                                    <button 
+                                    {/* <button 
                                         onClick={() => setSelectedContest(contest)}
+                                        style={{ width: '100%', padding: '12px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '1.1rem' }}
+                                    >
+                                        Enter Contest
+                                    </button> */}
+                                    <button
+                                        onClick={() => navigate(`/contest/${contest.id}`)}
                                         style={{ width: '100%', padding: '12px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '1.1rem' }}
                                     >
                                         Enter Contest
@@ -81,7 +87,7 @@ function JoinContest() {
                     <h2 style={{ marginTop: 0, fontSize: '2rem', color: '#334155', borderBottom: '2px solid #f1f5f9', paddingBottom: '15px', marginBottom: '30px' }}>
                         {selectedContest.title}
                     </h2>
-                    
+
                     <p style={{ fontSize: '1.1rem', color: '#64748b', marginBottom: '30px' }}>
                         Select a problem below to enter the coding workspace. You can solve them in any order!
                     </p>
@@ -94,7 +100,7 @@ function JoinContest() {
                                     <h3 style={{ margin: 0, color: '#334155' }}>Problem #{index + 1}</h3>
                                     <span style={{ color: '#64748b', fontSize: '0.9rem' }}>Database ID: {id}</span>
                                 </div>
-                                <button 
+                                <button
                                     onClick={() => navigate(`/workspace/${id}`)}
                                     style={{ padding: '10px 24px', backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}
                                 >

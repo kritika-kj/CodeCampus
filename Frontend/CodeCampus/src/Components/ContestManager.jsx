@@ -3,18 +3,21 @@ import { useNavigate } from 'react-router-dom';
 
 function ContestManager() {
     const navigate = useNavigate();
-    
+
     // UI State
     const [viewMode, setViewMode] = useState('list');
-    
+
     // Data State
     const [availableChallenges, setAvailableChallenges] = useState([]);
     const [activeContests, setActiveContests] = useState([]); // <-- NEW: State for the list view
-    
+
     // New Contest Form State
     const [contestTitle, setContestTitle] = useState('');
     const [selectedChallengeIds, setSelectedChallengeIds] = useState([]);
     const [statusMessage, setStatusMessage] = useState('');
+
+    //datetime
+    const [durationInMinutes, setDurationInMinutes] = useState(60);
 
     // Fetch available challenges for the creation form
     useEffect(() => {
@@ -62,8 +65,8 @@ function ContestManager() {
     };
 
     const handleCreateContest = async () => {
-        if (!contestTitle || selectedChallengeIds.length === 0) {
-            setStatusMessage('❌ Please provide a title and select at least one challenge.');
+if (!contestTitle || selectedChallengeIds.length === 0 || durationInMinutes <= 0) {
+            setStatusMessage('❌ Please provide a title, a valid duration, and select at least one challenge.');
             return;
         }
 
@@ -73,10 +76,11 @@ function ContestManager() {
             const response = await fetch('http://localhost:5174/api/contest/create', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    title: contestTitle, 
-                    challengeIds: selectedChallengeIds.join(',') 
-                }) 
+                body: JSON.stringify({
+                    title: contestTitle,
+                    challengeIds: selectedChallengeIds.join(','),
+                    durationInMinutes: durationInMinutes
+                })
             });
 
             if (response.ok) {
@@ -97,10 +101,10 @@ function ContestManager() {
             <button onClick={() => navigate('/dashboard')} style={{ marginBottom: '20px', background: 'none', border: 'none', color: '#007bff', cursor: 'pointer', textDecoration: 'underline' }}>
                 ← Back to Dashboard Menu
             </button>
-            
+
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <h2>{viewMode === 'list' ? 'Active & Past Contests' : 'Draft a New Contest'}</h2>
-                <button 
+                <button
                     onClick={() => setViewMode(viewMode === 'list' ? 'create' : 'list')}
                     style={{ padding: '10px 20px', backgroundColor: viewMode === 'list' ? '#28a745' : '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
                 >
@@ -130,7 +134,7 @@ function ContestManager() {
                                 {activeContests.map(c => (
                                     <tr key={c.id} style={{ borderBottom: '1px solid #eee' }}>
                                         <td style={tdStyle}>#{c.id}</td>
-                                        <td style={{...tdStyle, fontWeight: 'bold', color: '#333'}}>{c.title}</td>
+                                        <td style={{ ...tdStyle, fontWeight: 'bold', color: '#333' }}>{c.title}</td>
                                         {/* Count the commas to see how many problems there are! */}
                                         <td style={tdStyle}>{c.challengeIds.split(',').length} Problems</td>
                                         <td style={tdStyle}>
@@ -149,13 +153,21 @@ function ContestManager() {
             {/* ========================================= */}
             {viewMode === 'create' && (
                 <div style={{ background: '#ffffff', borderRadius: '8px', border: '1px solid #ddd', padding: '25px' }}>
-                    
+
                     <label style={labelStyle}>Contest Title</label>
                     <input type="text" placeholder="e.g., Weekly Algorithm Sprint #12" value={contestTitle} onChange={(e) => setContestTitle(e.target.value)} style={inputStyle} />
-
-                    <label style={{...labelStyle, marginTop: '20px'}}>Select Challenges to Include</label>
+                    <label style={{...labelStyle, marginTop: '20px'}}>Contest Duration (in minutes)</label>
+                    <input 
+                        type="number" 
+                        min="1"
+                        placeholder="e.g., 90" 
+                        value={durationInMinutes}
+                        onChange={(e) => setDurationInMinutes(parseInt(e.target.value) || 0)} 
+                        style={inputStyle} 
+                    />
+                    <label style={{ ...labelStyle, marginTop: '20px' }}>Select Challenges to Include</label>
                     <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '15px' }}>Choose the problems contestants will need to solve during this event.</p>
-                    
+
                     <div style={{ border: '1px solid #eee', borderRadius: '4px', maxHeight: '300px', overflowY: 'auto' }}>
                         {availableChallenges.length === 0 ? (
                             <p style={{ padding: '15px', color: '#dc3545' }}>No challenges found in database. Please create challenges first.</p>

@@ -22,7 +22,7 @@ export default function UserManagement() {
 
     }, []);
 
-    const handleROleChange = async (id, newRole) => {
+    const handleRoleChange = async (id, newRole) => {
         const token = sessionStorage.getItem('codeCampusToken');
         try {
             const response = await fetch(`http://localhost:5174/api/Admin/users/${id}/role`, {
@@ -68,7 +68,7 @@ export default function UserManagement() {
                             </td>
                             <td>
                                 <select value={user.role}
-                                    onChange={(e) => handleROleChange(user.id, e.target.value)}
+                                    onChange={(e) => handleRoleChange(user.id, e.target.value)}
                                 >
                                     <option value="Contestant">Contestant</option>
                                     <option value="Moderator">Moderator</option>
