@@ -16,14 +16,16 @@ namespace CodeCampus.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IConfiguration _configuration; // Added to access RapidAPI keys
+        private readonly IWebHostEnvironment _env;
 
         // Static HttpClient to prevent socket exhaustion
         private static readonly HttpClient _httpClient = new HttpClient();
 
-        public SubmissionController(AppDbContext context, IConfiguration configuration)
+        public SubmissionController(AppDbContext context, IConfiguration configuration, IWebHostEnvironment env)
         {
             _context = context;
             _configuration = configuration;
+            _env = env;
         }
 
         [HttpPost("run")]
@@ -144,11 +146,115 @@ namespace CodeCampus.Controllers
                 return StatusCode(500, new { status = "Error", feedback = $"Internal Server Error: {ex.Message}" });
             }
         }
+        [HttpPost("submit")]
+        public async Task<IActionResult> SubmitCode([FromBody] SubmitRequest request)
+        {
+            try
+            {
+
+                var newSubmission = new Submission
+                {
+                    UserId = request.UserId,
+                    ChallengeId = request.ChallengeId,
+                    ContestId = request.ContestId,
+                    SourceCode = request.SourceCode,
+                    Language = request.Language,
+                    CreatedAt = DateTime.UtcNow
+                };
+                // 1. Fetch challenge to get expected output
+                var challenge = await _context.Challenges.FindAsync(newSubmission.ChallengeId);
+                if (challenge == null) return NotFound("Challenge not found in database.");
+
+                newSubmission.CreatedAt = DateTime.UtcNow;
+
+                // 2. Execute against Judge0 (Local Docker) to grade it
+                int judge0LangId = newSubmission.Language.ToLower() switch
+                {
+                    "csharp" => 51,
+                    "java" => 62,
+                    "python" => 71,
+                    _ => 51
+                };
+
+                var apiPayload = new
+                {
+                    source_code = newSubmission.SourceCode,
+                    language_id = judge0LangId,
+                    stdin = challenge.SampleInput ?? ""
+                };
+
+                string jsonPayload = JsonSerializer.Serialize(apiPayload);
+                var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+                var response = await _httpClient.PostAsync("http://localhost:2358/submissions?wait=true&base64_encoded=false", content);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    newSubmission.Status = "Error";
+                    newSubmission.Feedback = "Execution Engine Error.";
+                }
+                else
+                {
+                    // 3. Parse Judge0 Response
+                    string apiResponseString = await response.Content.ReadAsStringAsync();
+                    using JsonDocument doc = JsonDocument.Parse(apiResponseString);
+                    var root = doc.RootElement;
+
+                    string actualOutput = root.TryGetProperty("stdout", out var stdoutProp) && stdoutProp.ValueKind != JsonValueKind.Null ? stdoutProp.GetString()?.Trim() ?? "" : "";
+                    string errorOutput = root.TryGetProperty("stderr", out var stderrProp) && stderrProp.ValueKind != JsonValueKind.Null ? stderrProp.GetString()?.Trim() ?? "" : "";
+                    string compileError = root.TryGetProperty("compile_output", out var compileProp) && compileProp.ValueKind != JsonValueKind.Null ? compileProp.GetString()?.Trim() ?? "" : "";
+
+                    string fullError = string.IsNullOrEmpty(errorOutput) ? compileError : errorOutput;
+
+                    // 4. Apply Grading Logic
+                    if (!string.IsNullOrEmpty(fullError))
+                    {
+                        newSubmission.Status = "Failed";
+                        newSubmission.Feedback = $"⚠️ Code Error:\n{fullError}";
+                    }
+                    else
+                    {
+                        string expectedOutput = challenge.SampleOutput?.Trim() ?? "";
+                        string normalizedActual = actualOutput.Replace("\r\n", "\n").Trim();
+                        string normalizedExpected = expectedOutput.Replace("\r\n", "\n").Trim();
+
+                        if (normalizedActual == normalizedExpected)
+                        {
+                            newSubmission.Status = "Passed";
+                            newSubmission.Feedback = "✅ Success! All test cases passed.";
+                        }
+                        else
+                        {
+                            newSubmission.Status = "Failed";
+                            newSubmission.Feedback = $"❌ Wrong Answer. Expected '{expectedOutput}' but got '{actualOutput}'";
+                        }
+                    }
+                }
+
+                // 5. Save the graded submission to SQL Server
+                _context.Submissions.Add(newSubmission);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Submission graded and saved successfully!", submissionId = newSubmission.Id });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Database error saving submission.", details = ex.Message });
+            }
+        }
     }
 
     public class CodeRequest
     {
         public int ChallengeId { get; set; }
+        public string SourceCode { get; set; } = string.Empty;
+        public string Language { get; set; } = string.Empty;
+    }
+    public class SubmitRequest
+    {
+        public int UserId { get; set; }
+        public int ChallengeId { get; set; }
+        public int ContestId { get; set; }
         public string SourceCode { get; set; } = string.Empty;
         public string Language { get; set; } = string.Empty;
     }

@@ -93,6 +93,21 @@ function ContestHub() {
                     🏁 Submit Entire Contest
                 </button>
             </div>
+            <button
+                onClick={() => navigate(`/results/${contestId}`)}
+                style={{
+                    padding: '10px 20px',
+                    backgroundColor: '#ffc107',
+                    color: '#333',
+                    border: 'none',
+                    borderRadius: '4px',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    marginBottom: '20px'
+                }}
+            >
+                🏆 View Leaderboard
+            </button>
         </div>
     );
 }

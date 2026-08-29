@@ -140,6 +140,16 @@ if (!contestTitle || selectedChallengeIds.length === 0 || durationInMinutes <= 0
                                         <td style={tdStyle}>
                                             <span style={{ padding: '4px 8px', borderRadius: '12px', backgroundColor: '#d4edda', color: '#155724', fontSize: '0.85rem', fontWeight: 'bold' }}>Live</span>
                                         </td>
+                                        <td style={tdStyle}>
+                                            <button
+                                                onClick={() => navigate(
+                                                    // `/contest/${c.id}`
+                                                )}
+                                                style={{ padding: '6px 12px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+                                            >
+                                                View Details
+                                            </button>
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>

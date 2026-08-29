@@ -11,5 +11,6 @@ namespace CodeCampus.Data
         public DbSet<User> Users { get; set; }
         public DbSet<Challenges> Challenges { get; set; }
         public DbSet<Contest> Contests { get; set; }
+        public DbSet<Submission> Submissions { get; set; }
     }
 }
