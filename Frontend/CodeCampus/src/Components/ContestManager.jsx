@@ -15,9 +15,11 @@ function ContestManager() {
     const [contestTitle, setContestTitle] = useState('');
     const [selectedChallengeIds, setSelectedChallengeIds] = useState([]);
     const [statusMessage, setStatusMessage] = useState('');
+    const [selectedContestId, setSelectedContestId] = useState(null);
 
     //datetime
     const [durationInMinutes, setDurationInMinutes] = useState(60);
+    const [isSaved, setIsSaved] = useState(false);
 
     // Fetch available challenges for the creation form
     useEffect(() => {
@@ -40,7 +42,7 @@ function ContestManager() {
         if (viewMode === 'list') {
             const fetchActiveContests = async () => {
                 try {
-                    const response = await fetch('http://localhost:5174/api/contest/active');
+                    const response = await fetch('http://localhost:5174/api/contest/all');
                     if (response.ok) {
                         const data = await response.json();
                         setActiveContests(data);
@@ -53,6 +55,28 @@ function ContestManager() {
         }
     }, [viewMode]);
 
+    useEffect(() => {
+        if (viewMode === 'edit' && selectedContestId) {
+            const fetchContestDetails = async () => {
+                try {
+                    const response = await fetch(`http://localhost:5174/api/contest/${selectedContestId}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        setContestTitle(data.title);
+                        setDurationInMinutes(data.durationInMinutes);
+                        if (data.challengeIds) {
+                            const parsedIds = data.challengeIds.split(',').map(id => parseInt(id.trim()));
+                            setSelectedChallengeIds(parsedIds);
+                        }
+                    }
+                } catch (error) {
+                    console.error("Failed to load contest details");
+                }
+            };
+            fetchContestDetails();
+        }
+    }, [viewMode, selectedContestId]);
+
     // Handle Checkbox clicks
     const handleCheckboxChange = (challengeId) => {
         setSelectedChallengeIds(prev => {
@@ -63,38 +87,59 @@ function ContestManager() {
             }
         });
     };
-
-    const handleCreateContest = async () => {
-if (!contestTitle || selectedChallengeIds.length === 0 || durationInMinutes <= 0) {
+    const handleEditContest = (contestId) => {
+        setSelectedContestId(contestId);
+        setViewMode('edit');
+    };
+    const handleProcessContest = async (startImmediately) => {
+        if (!contestTitle || selectedChallengeIds.length === 0 || durationInMinutes <= 0) {
             setStatusMessage('❌ Please provide a title, a valid duration, and select at least one challenge.');
             return;
         }
 
-        setStatusMessage('Starting Contest...');
+        setStatusMessage(startImmediately ? '🚀 Launching Contest...' : '💾 Saving Draft...');
+
+        // Package the data, injecting the boolean from the button click
+        const payload = {
+            title: contestTitle,
+            challengeIds: selectedChallengeIds.join(','),
+            durationInMinutes: durationInMinutes,
+            isActive: startImmediately
+        };
 
         try {
-            const response = await fetch('http://localhost:5174/api/contest/create', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    title: contestTitle,
-                    challengeIds: selectedChallengeIds.join(','),
-                    durationInMinutes: durationInMinutes
-                })
-            });
+            let response;
+            if (viewMode === 'edit') {
+                response = await fetch(`http://localhost:5174/api/contest/${selectedContestId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: selectedContestId, ...payload })
+                });
+            } else {
+                // Create brand new record
+                response = await fetch('http://localhost:5174/api/contest/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            }
 
             if (response.ok) {
+                // Clear the form and return to the list
                 setContestTitle('');
                 setSelectedChallengeIds([]);
+                setSelectedContestId(null);
                 setStatusMessage('');
-                setViewMode('list'); // Switches to list view, which triggers the useEffect to fetch!
+                setViewMode('list');
             } else {
-                setStatusMessage('❌ Failed to start contest.');
+                setStatusMessage('❌ Failed to process contest.');
             }
         } catch (error) {
             setStatusMessage('❌ Server error. Is C# running?');
         }
+
     };
+
 
     return (
         <div style={{ maxWidth: '900px', margin: '0 auto', padding: '20px' }}>
@@ -138,13 +183,15 @@ if (!contestTitle || selectedChallengeIds.length === 0 || durationInMinutes <= 0
                                         {/* Count the commas to see how many problems there are! */}
                                         <td style={tdStyle}>{c.challengeIds.split(',').length} Problems</td>
                                         <td style={tdStyle}>
-                                            <span style={{ padding: '4px 8px', borderRadius: '12px', backgroundColor: '#d4edda', color: '#155724', fontSize: '0.85rem', fontWeight: 'bold' }}>Live</span>
+                                            {c.isActive ? (
+                                                <span style={{ padding: '4px 8px', borderRadius: '12px', backgroundColor: '#d4edda', color: '#155724', fontSize: '0.85rem', fontWeight: 'bold' }}>Active</span>
+                                            ) : (
+                                                <span style={{ padding: '4px 8px', borderRadius: '12px', backgroundColor: '#f5d7d7', color: '#615859', fontSize: '0.85rem', fontWeight: 'bold' }}>Inactive</span>
+                                            )}
                                         </td>
                                         <td style={tdStyle}>
                                             <button
-                                                onClick={() => navigate(
-                                                    // `/contest/${c.id}`
-                                                )}
+                                                onClick={() => handleEditContest(c.id)}
                                                 style={{ padding: '6px 12px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
                                             >
                                                 View Details
@@ -161,19 +208,19 @@ if (!contestTitle || selectedChallengeIds.length === 0 || durationInMinutes <= 0
             {/* ========================================= */}
             {/* VIEW 2: THE CREATION FORM                 */}
             {/* ========================================= */}
-            {viewMode === 'create' && (
+            {(viewMode === 'create' || viewMode === 'edit') && (
                 <div style={{ background: '#ffffff', borderRadius: '8px', border: '1px solid #ddd', padding: '25px' }}>
 
                     <label style={labelStyle}>Contest Title</label>
                     <input type="text" placeholder="e.g., Weekly Algorithm Sprint #12" value={contestTitle} onChange={(e) => setContestTitle(e.target.value)} style={inputStyle} />
-                    <label style={{...labelStyle, marginTop: '20px'}}>Contest Duration (in minutes)</label>
-                    <input 
-                        type="number" 
+                    <label style={{ ...labelStyle, marginTop: '20px' }}>Contest Duration (in minutes)</label>
+                    <input
+                        type="number"
                         min="1"
-                        placeholder="e.g., 90" 
+                        placeholder="e.g., 90"
                         value={durationInMinutes}
-                        onChange={(e) => setDurationInMinutes(parseInt(e.target.value) || 0)} 
-                        style={inputStyle} 
+                        onChange={(e) => setDurationInMinutes(parseInt(e.target.value) || 0)}
+                        style={inputStyle}
                     />
                     <label style={{ ...labelStyle, marginTop: '20px' }}>Select Challenges to Include</label>
                     <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '15px' }}>Choose the problems contestants will need to solve during this event.</p>
@@ -194,11 +241,23 @@ if (!contestTitle || selectedChallengeIds.length === 0 || durationInMinutes <= 0
                         )}
                     </div>
 
-                    <div style={{ marginTop: '30px', borderTop: '1px solid #ddd', paddingTop: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ marginTop: '30px', borderTop: '1px solid #ddd', paddingTop: '20px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
                         <span style={{ fontWeight: 'bold', color: 'red' }}>{statusMessage}</span>
-                        <button onClick={handleCreateContest} style={{ padding: '12px 24px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '1.1rem' }}>
-                            🚀 Save & Start Contest
-                        </button>
+                        <div style={{ display: 'flex', gap: '15px' }}>
+                            <button
+                                onClick={() => handleProcessContest(false)}
+                                style={{ padding: '12px 24px', backgroundColor: '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem' }}
+                            >
+                                💾 Save as Draft
+                            </button>
+
+                            <button
+                                onClick={() => handleProcessContest(true)}
+                                style={{ padding: '12px 24px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem' }}
+                            >
+                                🚀 Save & Start
+                            </button>
+                        </div>
                     </div>
 
                 </div>

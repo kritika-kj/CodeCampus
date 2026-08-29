@@ -13,8 +13,8 @@ namespace CodeCampus.Models
         // We will store the selected challenges like this: "1,4,5"
         public string ChallengeIds { get; set; } = string.Empty;
 
-        public DateTime StartTime { get; set; }
-        public DateTime EndTime { get; set; }
+        public DateTime? StartTime { get; set; }
+        public DateTime? EndTime { get; set; }
 
         public int DurationInMinutes { get; set; }
         public bool IsActive { get; set; } = true;

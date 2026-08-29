@@ -91,13 +91,13 @@ namespace CodeCampus.Migrations
                     b.Property<int>("DurationInMinutes")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("EndTime")
+                    b.Property<DateTime?>("EndTime")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<DateTime>("StartTime")
+                    b.Property<DateTime?>("StartTime")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Title")

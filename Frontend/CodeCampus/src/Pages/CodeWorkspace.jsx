@@ -255,6 +255,11 @@ import React, { useState, useEffect } from 'react';
 import ContestTimer from '../Components/ContestTimer'; 
 import { useNavigate, useParams } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
+const BOILERPLATE_CODE = {
+    csharp: '// Write your code here...\nusing System;\n\npublic class Program {\n    public static void Main() {\n        Console.WriteLine("Hello CodeCampus!");\n    }\n}',
+    java: '// Write your code here...\npublic class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello CodeCampus!");\n    }\n}',
+    python: '# Write your code here...\nprint("Hello CodeCampus!")'
+};
 
 function CodeWorkspace() {
     const navigate = useNavigate();
@@ -270,10 +275,14 @@ function CodeWorkspace() {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [language, setLanguage] = useState('csharp');
-    const [code, setCode] = useState('// Write your code here...\nusing System;\n\npublic class Program {\n    public static void Main() {\n        Console.WriteLine("Hello CodeCampus!");\n    }\n}');
+    const [code, setCode] = useState(BOILERPLATE_CODE.csharp);
 
     // Dynamically grabs your logged-in User ID from your existing login system
     const activeUserId = sessionStorage.getItem('userId') ? parseInt(sessionStorage.getItem('userId')) : 1;
+
+    useEffect(() => {
+        setCode(BOILERPLATE_CODE[language] || BOILERPLATE_CODE.csharp);
+    }, [language]);
 
     useEffect(() => {
         const fetchChallenge = async () => {
@@ -454,7 +463,7 @@ function CodeWorkspace() {
                         theme="vs-dark"
                         language={language}
                         value={code}
-                        onChange={(value) => setCode(value)}
+                        onChange={(newValue) => setCode(newValue)}
                         options={{ minimap: { enabled: false }, fontSize: 16, padding: { top: 20 } }}
                     />
                 </div>
