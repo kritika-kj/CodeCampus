@@ -54,20 +54,12 @@ function App() {
           <Route path="challenges" element={<ChallengeManager />} />    
           <Route path="contests" element={<ContestManager />} />
           <Route path="join" element={<JoinContest />} />
-          <Route path="settings" element = {
-            userRole === "Admin"? <UserManagement/>: <Navigate to ="/dashboard" replace />
-          }
-          />
+          {/* <Route path="submissions" element={  userRole === "Contestant" ? <Submissions /> : <Navigate to="/dashboard" replace />  } /> */}
+          <Route path="settings" element = {  userRole === "Admin"? <UserManagement/>: <Navigate to ="/dashboard" replace />}/>
         </Route>
-        <Route path="/contest/:contestId" element={
-          isAuthenticated ? <ContestHub /> : <Navigate to="/login" />
-        } />   
-        <Route path="/workspace/:contestId/:challengeId" element={
-          isAuthenticated ? <CodeWorkspace /> : <Navigate to="/login" />
-        } />       
-        <Route path="/results/:contestId" element={
-          isAuthenticated ? <ContestResults /> : <Navigate to="/login" />
-        } />
+        <Route path="/contest/:contestId" element={  isAuthenticated ? <ContestHub /> : <Navigate to="/login" />} />   
+        <Route path="/workspace/:contestId/:challengeId" element={  isAuthenticated ? <CodeWorkspace /> : <Navigate to="/login" />  } />       
+        <Route path="/results/:contestId" element={  isAuthenticated ? <ContestResults /> : <Navigate to="/login" />  } />
       </Routes>
     </BrowserRouter>
   );

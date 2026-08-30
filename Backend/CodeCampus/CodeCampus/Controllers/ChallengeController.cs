@@ -19,16 +19,30 @@ namespace CodeCampus.Controllers
 
         // POST: api/challenge/create
         [HttpPost("create")]
-        public async Task<IActionResult> CreateChallenge([FromBody] Challenges newChallenge)
+        public async Task<IActionResult> CreateChallenge([FromBody] CreateChallengeRequest request)
         {
-            // 1. Add it to the tracking system
+            var newChallenge = new Challenges
+            {
+                Title = request.Title,
+                Description = request.Description,
+                Difficulty = request.Difficulty,
+                Points = request.Points,
+                InputFormat = request.InputFormat,
+                OutputFormat = request.OutputFormat,
+
+                // Map the DTOs to your actual SQL entities
+                TestCases = request.TestCases.Select(tc => new TestCase
+                {
+                    InputData = tc.InputData,
+                    ExpectedOutput = tc.ExpectedOutput,
+                    IsHidden = tc.IsHidden
+                }).ToList()
+            };
+
             _context.Challenges.Add(newChallenge);
+            await _context.SaveChangesAsync(); // Saves everything in one database transaction!
 
-            // 2. Save it permanently to the SQL database
-            await _context.SaveChangesAsync();
-
-            // 3. Send a success message back to React
-            return Ok(new { message = "Challenge published successfully!", id = newChallenge.Id });
+            return Ok(new { message = "Challenge and Test Cases saved successfully!" });
         }
 
         // GET: api/challenge
@@ -45,20 +59,51 @@ namespace CodeCampus.Controllers
 
         // --- ADDED THIS NEW ENDPOINT ---
         // GET: api/challenge/5
+        //[HttpGet("{id}")]
+        //public async Task<IActionResult> GetChallenge(int id)
+        //{
+        //    // 1. Find the specific challenge by its ID in the database
+        //    var challenge = await _context.Challenges.FindAsync(id);
+
+        //    // 2. If it doesn't exist, tell React it's missing
+        //    if (challenge == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    // 3. If found, send the data over to the Monaco Editor!
+        //    return Ok(challenge);
+        //}
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetChallenge(int id)
+        public async Task<IActionResult> GetChallengeById(int id)
         {
-            // 1. Find the specific challenge by its ID in the database
-            var challenge = await _context.Challenges.FindAsync(id);
+            // Fetch the challenge and ONLY the visible test cases
+            var challenge = await _context.Challenges
+                .Include(c => c.TestCases.Where(tc => tc.IsHidden == false))
+                .FirstOrDefaultAsync(c => c.Id == id);
 
-            // 2. If it doesn't exist, tell React it's missing
-            if (challenge == null)
-            {
-                return NotFound();
-            }
+            if (challenge == null) return NotFound("Challenge not found.");
 
-            // 3. If found, send the data over to the Monaco Editor!
             return Ok(challenge);
+        }
+        public class CreateChallengeRequest
+        {
+            public string Title { get; set; }
+            public string Description { get; set; }
+            public string Difficulty { get; set; }
+            public int Points { get; set; }
+            public string InputFormat { get; set; }
+            public string OutputFormat { get; set; }
+
+            // The incoming array from React
+            public List<TestCaseDto> TestCases { get; set; } = new List<TestCaseDto>();
+        }
+
+        public class TestCaseDto
+        {
+            public string InputData { get; set; }
+            public string ExpectedOutput { get; set; }
+            public bool IsHidden { get; set; }
         }
     }
 }

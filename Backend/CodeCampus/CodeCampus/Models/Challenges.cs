@@ -25,5 +25,6 @@ namespace CodeCampus.Models
         public string Constraints { get; set; } = string.Empty;
         public string SampleInput { get; set; } = string.Empty;
         public string SampleOutput { get; set; } = string.Empty;
+        public ICollection<TestCase> TestCases { get; set; } = new List<TestCase>();
     }
 }

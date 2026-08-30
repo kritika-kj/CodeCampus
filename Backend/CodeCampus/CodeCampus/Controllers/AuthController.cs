@@ -35,7 +35,7 @@ namespace CodeCampus.Controllers
             }
             var token = GenerateJwtToken(user);
 
-            return Ok(new { message = "Login successful", token = token, role = user.Role });
+            return Ok(new { message = "Login successful", token = token, role = user.Role, Name = user.Name, Id = user.Id });
         }
 
         [HttpPost("register")]

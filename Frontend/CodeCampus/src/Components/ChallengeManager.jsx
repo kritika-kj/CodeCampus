@@ -9,7 +9,7 @@ function ChallengeManager() {
     const [challenges, setChallenges] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
 
-    // Form State (Same as before)
+    // Form State 
     const [activeTab, setActiveTab] = useState('General');
     const [title, setTitle] = useState('');
     const [difficulty, setDifficulty] = useState('Easy');
@@ -18,11 +18,14 @@ function ChallengeManager() {
     const [inputFormat, setInputFormat] = useState('');
     const [outputFormat, setOutputFormat] = useState('');
     const [constraints, setConstraints] = useState('');
-    const [sampleInput, setSampleInput] = useState('');
-    const [sampleOutput, setSampleOutput] = useState('');
     const [statusMessage, setStatusMessage] = useState('');
 
-    // --- FETCH DATA (Runs when viewMode changes to 'list') ---
+    // --- NEW: Dynamic Test Cases State ---
+    const [testCases, setTestCases] = useState([
+        { inputData: '', expectedOutput: '', isHidden: false }
+    ]);
+
+    // --- FETCH DATA ---
     useEffect(() => {
         if (viewMode === 'list') {
             fetchChallenges();
@@ -45,6 +48,23 @@ function ChallengeManager() {
         setIsLoading(false);
     };
 
+    // --- TEST CASE HANDLERS ---
+    const handleTestCaseChange = (index, field, value) => {
+        const updated = [...testCases];
+        updated[index][field] = value;
+        setTestCases(updated);
+    };
+
+    const addTestCase = () => {
+        // Defaults new test cases to hidden so students don't see all of them
+        setTestCases([...testCases, { inputData: '', expectedOutput: '', isHidden: true }]);
+    };
+
+    const removeTestCase = (index) => {
+        const updated = testCases.filter((_, i) => i !== index);
+        setTestCases(updated);
+    };
+
     // --- SUBMIT DATA ---
     const handlePublish = async () => {
         setStatusMessage('Publishing...');
@@ -52,12 +72,18 @@ function ChallengeManager() {
             const response = await fetch('http://localhost:5174/api/challenge/create', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title, description, difficulty, points, inputFormat, outputFormat, constraints, sampleInput, sampleOutput }) 
+                // Notice we are sending testCases instead of sampleInput/Output
+                body: JSON.stringify({ 
+                    title, description, difficulty, points, 
+                    inputFormat, outputFormat, constraints, 
+                    testCases 
+                }) 
             });
 
             if (response.ok) {
-                // Clear form and go back to list!
-                setTitle(''); setDescription(''); setInputFormat(''); setOutputFormat(''); setConstraints(''); setSampleInput(''); setSampleOutput('');
+                // Clear form and go back to list
+                setTitle(''); setDescription(''); setInputFormat(''); setOutputFormat(''); setConstraints(''); 
+                setTestCases([{ inputData: '', expectedOutput: '', isHidden: false }]);
                 setStatusMessage('');
                 setViewMode('list'); 
             } else {
@@ -179,10 +205,44 @@ function ChallengeManager() {
                                 <label style={labelStyle}>Output Format</label><textarea rows="3" value={outputFormat} onChange={(e) => setOutputFormat(e.target.value)} style={inputStyle}></textarea>
                             </div>
                         )}
+                        
+                        {/* THE DYNAMIC TEST CASES TAB */}
                         {activeTab === 'Test Cases' && (
-                            <div style={{ display: 'flex', gap: '15px' }}>
-                                <div style={{ flex: 1 }}><label style={labelStyle}>Sample Input</label><textarea rows="5" value={sampleInput} onChange={(e) => setSampleInput(e.target.value)} style={{...inputStyle, fontFamily: 'monospace'}}></textarea></div>
-                                <div style={{ flex: 1 }}><label style={labelStyle}>Expected Output</label><textarea rows="5" value={sampleOutput} onChange={(e) => setSampleOutput(e.target.value)} style={{...inputStyle, fontFamily: 'monospace'}}></textarea></div>
+                            <div>
+                                {testCases.map((tc, index) => (
+                                    <div key={index} style={{ display: 'flex', gap: '15px', marginBottom: '20px', padding: '15px', border: '1px solid #ddd', borderRadius: '6px', backgroundColor: '#f8f9fa' }}>
+                                        <div style={{ flex: 1 }}>
+                                            <label style={labelStyle}>Input {index + 1}</label>
+                                            <textarea rows="4" value={tc.inputData} onChange={(e) => handleTestCaseChange(index, 'inputData', e.target.value)} style={{...inputStyle, marginBottom: '10px', fontFamily: 'monospace'}}></textarea>
+                                            
+                                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: '#555' }}>
+                                                <input 
+                                                    type="checkbox" 
+                                                    checked={tc.isHidden} 
+                                                    onChange={(e) => handleTestCaseChange(index, 'isHidden', e.target.checked)} 
+                                                />
+                                                Hidden Test Case (For Grading Only)
+                                            </label>
+                                        </div>
+                                        <div style={{ flex: 1 }}>
+                                            <label style={labelStyle}>Expected Output {index + 1}</label>
+                                            <textarea rows="4" value={tc.expectedOutput} onChange={(e) => handleTestCaseChange(index, 'expectedOutput', e.target.value)} style={{...inputStyle, marginBottom: '10px', fontFamily: 'monospace'}}></textarea>
+                                            
+                                            {/* Only show delete button if there is more than 1 test case */}
+                                            {testCases.length > 1 && (
+                                                <div style={{ textAlign: 'right' }}>
+                                                    <button onClick={() => removeTestCase(index)} style={{ padding: '6px 12px', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem' }}>
+                                                        Remove
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                                
+                                <button onClick={addTestCase} type="button" style={{ padding: '10px 20px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
+                                    + Add Another Test Case
+                                </button>
                             </div>
                         )}
                     </div>

@@ -178,6 +178,51 @@ namespace CodeCampus.Migrations
 
                     b.ToTable("Users");
                 });
+
+            modelBuilder.Entity("TestCase", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ChallengeId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ExpectedOutput")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("InputData")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsHidden")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChallengeId");
+
+                    b.ToTable("TestCases");
+                });
+
+            modelBuilder.Entity("TestCase", b =>
+                {
+                    b.HasOne("CodeCampus.Models.Challenges", "Challenge")
+                        .WithMany("TestCases")
+                        .HasForeignKey("ChallengeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Challenge");
+                });
+
+            modelBuilder.Entity("CodeCampus.Models.Challenges", b =>
+                {
+                    b.Navigation("TestCases");
+                });
 #pragma warning restore 612, 618
         }
     }

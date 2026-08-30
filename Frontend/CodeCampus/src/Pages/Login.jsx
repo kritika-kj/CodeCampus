@@ -41,6 +41,8 @@ function Login({ onLoginSuccess }) {
                 if (response.ok) {
                     sessionStorage.setItem('codeCampusToken', data.token);
                     sessionStorage.setItem('userRole', data.role);
+                    sessionStorage.setItem('userId', data.id); 
+                    sessionStorage.setItem('userName', data.name); 
                     onLoginSuccess(data.role); 
                 } else {
                     // Failed login (Unauthorized)

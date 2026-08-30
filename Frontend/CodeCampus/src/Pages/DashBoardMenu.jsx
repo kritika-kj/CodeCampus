@@ -19,7 +19,7 @@ function DashboardMenu({ role }) {
           <>
               <DashBoardOption text="Join Contest" onClick={() => navigate('/dashboard/join')} />
               <DashBoardOption text="View Submissions" onClick={() => navigate('/dashboard/submissions')} />
-              <DashBoardOption text="Enter Arena (Test)" onClick={() => navigate('/workspace/1')} />
+              {/* <DashBoardOption text="Enter Arena (Test)" onClick={() => navigate('/workspace/1')} /> */}
           </>
       )}
 

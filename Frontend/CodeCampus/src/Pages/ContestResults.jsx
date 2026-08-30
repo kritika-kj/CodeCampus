@@ -28,7 +28,7 @@ function ContestResults() {
     if (isLoading) return <div style={{ padding: '50px', textAlign: 'center' }}>Calculating final scores...</div>;
 
     return (
-        <div style={{ padding: '40px', maxWidth: '800px', margin: '0 auto', fontFamily: 'sans-serif' }}>
+        <div style={{ padding: '40px', maxWidth: '900px', margin: '0 auto', fontFamily: 'sans-serif' }}>
             <h1 style={{ textAlign: 'center', marginBottom: '30px' }}>Contest #{contestId} Leaderboard</h1>
             
             {leaderboard.length === 0 ? (
@@ -38,20 +38,26 @@ function ContestResults() {
                     <thead>
                         <tr style={{ backgroundColor: '#007bff', color: 'white', textAlign: 'left' }}>
                             <th style={{ padding: '12px' }}>Rank</th>
-                            <th style={{ padding: '12px' }}>Student ID</th>
-                            <th style={{ padding: '12px' }}>Problems Solved</th>
-                            <th style={{ padding: '12px' }}>Total Score</th>
+                            <th style={{ padding: '12px' }}>Player</th>
+                            <th style={{ padding: '12px' }}>Challenges Solved</th>
+                            <th style={{ padding: '12px' }}>Score</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {leaderboard.map((student, index) => (
-                            <tr key={student.userId} style={{ borderBottom: '1px solid #ddd' }}>
-                                <td style={{ padding: '12px', fontWeight: 'bold' }}>#{index + 1}</td>
-                                <td style={{ padding: '12px' }}>Student {student.userId}</td>
-                                <td style={{ padding: '12px' }}>{student.problemsSolved}</td>
-                                <td style={{ padding: '12px', color: '#28a745', fontWeight: 'bold' }}>{student.totalScore} pts</td>
-                            </tr>
-                        ))}
+                        {leaderboard.map((student, index) => {
+                            const displayName = student.name || student.userName || `Student ${student.userId}`;
+                            const score = student.score ?? student.totalScore ?? 0;
+                            const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
+
+                            return (
+                                <tr key={student.userId} style={{ borderBottom: '1px solid #ddd' }}>
+                                    <td style={{ padding: '12px', fontWeight: 'bold' }}>{medal ? `${medal} #${student.rank ?? index + 1}` : `#${student.rank ?? index + 1}`}</td>
+                                    <td style={{ padding: '12px' }}>{displayName}</td>
+                                    <td style={{ padding: '12px' }}>{student.problemsSolved ?? 0}</td>
+                                    <td style={{ padding: '12px', color: '#28a745', fontWeight: 'bold' }}>{score} pts</td>
+                                </tr>
+                            );
+                        })}
                     </tbody>
                 </table>
             )}

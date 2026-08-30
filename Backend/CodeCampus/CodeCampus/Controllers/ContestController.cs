@@ -3,6 +3,9 @@ using CodeCampus.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace CodeCampus.Controllers
@@ -97,20 +100,105 @@ namespace CodeCampus.Controllers
         [HttpGet("{id}/leaderboard")]
         public async Task<IActionResult> GetLeaderboard(int id)
         {
-            var leaderboard = await _context.Submissions
-                .Where(s => s.ContestId == id && s.Status == "Passed")
-                .GroupBy(s => s.UserId)
-                .Select(g => new
-                {
-                    UserId = g.Key,
-                    // Awards 10 points per passed challenge
-                    TotalScore = g.Count() * 10,
-                    ProblemsSolved = g.Count()
-                })
-                .OrderByDescending(l => l.TotalScore)
+            var contestSubmissions = await _context.Submissions
+                .Where(s => s.ContestId == id)
+                .OrderBy(s => s.UserId)
+                .ThenBy(s => s.ChallengeId)
+                .ThenByDescending(s => s.CreatedAt)
                 .ToListAsync();
 
+            if (!contestSubmissions.Any())
+            {
+                return Ok(new List<object>());
+            }
+
+            var userChallengeBestScore = new Dictionary<int, Dictionary<int, int>>();
+            var userIds = contestSubmissions.Select(s => s.UserId).Distinct().ToList();
+            var userNames = await _context.Users
+                .Where(u => userIds.Contains(u.Id))
+                .Select(u => new { u.Id, u.Name })
+                .ToDictionaryAsync(u => u.Id, u => u.Name);
+
+            foreach (var submission in contestSubmissions)
+            {
+                var challenge = await _context.Challenges.FindAsync(submission.ChallengeId);
+                int challengePoints = challenge?.Points ?? 0;
+                int earnedPoints = ExtractAwardedPoints(submission.Feedback, challengePoints);
+
+                if (!userChallengeBestScore.ContainsKey(submission.UserId))
+                {
+                    userChallengeBestScore[submission.UserId] = new Dictionary<int, int>();
+                }
+
+                if (!userChallengeBestScore[submission.UserId].ContainsKey(submission.ChallengeId) ||
+                    earnedPoints > userChallengeBestScore[submission.UserId][submission.ChallengeId])
+                {
+                    userChallengeBestScore[submission.UserId][submission.ChallengeId] = earnedPoints;
+                }
+            }
+
+            var leaderboard = userChallengeBestScore
+                .Select(entry =>
+                {
+                    var userId = entry.Key;
+                    var challengeScores = entry.Value.Values.ToList();
+                    var totalScore = challengeScores.Sum();
+                    var problemsSolved = challengeScores.Count(score => score > 0);
+                    var name = userNames.TryGetValue(userId, out var userName) && !string.IsNullOrWhiteSpace(userName)
+                        ? userName
+                        : $"Student {userId}";
+
+                    return new
+                    {
+                        UserId = userId,
+                        Name = name,
+                        ProblemsSolved = problemsSolved,
+                        Score = totalScore,
+                        TotalScore = totalScore
+                    };
+                })
+                .OrderByDescending(x => x.Score)
+                .ThenByDescending(x => x.ProblemsSolved)
+                .ThenBy(x => x.UserId)
+                .Select((x, index) => new
+                {
+                    Rank = index + 1,
+                    x.UserId,
+                    x.Name,
+                    x.ProblemsSolved,
+                    x.Score,
+                    x.TotalScore
+                })
+                .ToList();
+
             return Ok(leaderboard);
+        }
+
+        private static int ExtractAwardedPoints(string feedback, int challengePoints)
+        {
+            if (string.IsNullOrWhiteSpace(feedback))
+            {
+                return 0;
+            }
+
+            var partialMatch = Regex.Match(feedback, @"Partial credit:\s*(\d+)", RegexOptions.IgnoreCase);
+            if (partialMatch.Success)
+            {
+                return int.TryParse(partialMatch.Groups[1].Value, out var partialPoints) ? partialPoints : 0;
+            }
+
+            var awardedMatch = Regex.Match(feedback, @"Awarded\s+(\d+)\s+points", RegexOptions.IgnoreCase);
+            if (awardedMatch.Success)
+            {
+                return int.TryParse(awardedMatch.Groups[1].Value, out var awardedPoints) ? awardedPoints : 0;
+            }
+
+            if (feedback.Contains("All", StringComparison.OrdinalIgnoreCase) && feedback.Contains("passed", StringComparison.OrdinalIgnoreCase))
+            {
+                return challengePoints;
+            }
+
+            return 0;
         }
     }
 }
