@@ -2,7 +2,7 @@
 using CodeCampus.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration; // Added for reading appsettings.json
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Net.Http;
 using System.Text;
@@ -16,7 +16,7 @@ namespace CodeCampus.Controllers
     public class SubmissionController : ControllerBase
     {
         private readonly AppDbContext _context;
-        private readonly IConfiguration _configuration; // Added to access RapidAPI keys
+        private readonly IConfiguration _configuration; 
         private readonly IWebHostEnvironment _env;
 
         // Static HttpClient to prevent socket exhaustion
@@ -32,7 +32,6 @@ namespace CodeCampus.Controllers
         [HttpPost("run")]
         public async Task<IActionResult> RunCode([FromBody] CodeRequest request)
         {
-            // 1. Fetch only VISIBLE test cases for the "Run" button
             var testCases = await _context.TestCases
                 .Where(t => t.ChallengeId == request.ChallengeId && t.IsHidden == false)
                 .OrderBy(t => t.Id)
@@ -144,10 +143,20 @@ namespace CodeCampus.Controllers
                 ContestId = request.ContestId,
                 SourceCode = request.SourceCode,
                 Language = request.Language,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                AwardedPoints= request.awardedPoints
             };
 
-            // 1. Fetch ALL test cases (visible + hidden) for rigorous grading
+            var contest = await _context.Contests.FindAsync(request.ContestId);
+            if (contest != null && contest.EndTime.HasValue && DateTime.UtcNow > contest.EndTime.Value)
+            {
+                return BadRequest(new
+                {
+                    status = "Failed",
+                    message = "Time is up! The contest has officially ended."
+                });
+            }
+
             var testCases = await _context.TestCases
                 .Where(t => t.ChallengeId == request.ChallengeId)
                 .OrderBy(t => t.Id)
@@ -159,7 +168,8 @@ namespace CodeCampus.Controllers
             inputBuilder.AppendLine(testCases.Count.ToString());
             foreach (var tc in testCases)
             {
-                inputBuilder.AppendLine(tc.InputData);
+                string cleanInput = tc.InputData.Replace("\r\n", "\n").TrimEnd();
+                inputBuilder.AppendLine(cleanInput);
             }
             string finalInput = inputBuilder.ToString();
 
@@ -282,6 +292,7 @@ namespace CodeCampus.Controllers
         public int ContestId { get; set; }
         public string SourceCode { get; set; } = string.Empty;
         public string Language { get; set; } = string.Empty;
+        public int awardedPoints { get; set; }
     }
     public class EvaluationResponse
     {

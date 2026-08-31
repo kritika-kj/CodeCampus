@@ -7,7 +7,7 @@ import DashboardMenu from './Pages/DashBoardMenu';
 import ChallengeManager from './Components/ChallengeManager'; 
 import ContestManager from './Components/ContestManager';
 import JoinContest from './Components/JoinContest';
-
+import Submissions from './Pages/Submissions';
 import ContestHub from './Pages/ContestHub'; 
 import ContestResults from './Pages/ContestResults';
 // import { BrowserRouter, Routes } from 'react-router-dom';
@@ -54,7 +54,7 @@ function App() {
           <Route path="challenges" element={<ChallengeManager />} />    
           <Route path="contests" element={<ContestManager />} />
           <Route path="join" element={<JoinContest />} />
-          {/* <Route path="submissions" element={  userRole === "Contestant" ? <Submissions /> : <Navigate to="/dashboard" replace />  } /> */}
+          <Route path="submissions" element={  userRole === "Contestant" ? <Submissions /> : <Navigate to="/dashboard" replace />  } />
           <Route path="settings" element = {  userRole === "Admin"? <UserManagement/>: <Navigate to ="/dashboard" replace />}/>
         </Route>
         <Route path="/contest/:contestId" element={  isAuthenticated ? <ContestHub /> : <Navigate to="/login" />} />   

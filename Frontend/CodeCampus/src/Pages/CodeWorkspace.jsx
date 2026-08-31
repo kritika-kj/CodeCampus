@@ -233,42 +233,53 @@ function CodeWorkspace() {
                     {isEvaluating ? (
                         <div style={{ color: '#4da6ff', fontStyle: 'italic' }}>Evaluating test cases...</div>
                     ) : result ? (
-                        <div style={{ padding: '15px', backgroundColor: '#2d2d2d', borderRadius: '4px', border: '1px solid #444' }}>
-                            <h3 style={{
-                                color: result.status === 'Passed' ? '#28a745' : '#dc3545',
-                                margin: '0 0 15px 0'
-                            }}>
-                                {result.status === 'Passed' ? '✅ Accepted' : '❌ Wrong Answer'}
-                            </h3>
+                        result.status === 'Error' ? (
+                            // 🚨 THIS IS THE NEW ERROR CATCHER 🚨
+                            <div style={{ padding: '15px', backgroundColor: 'rgba(220, 53, 69, 0.1)', border: '1px solid #dc3545', borderRadius: '4px' }}>
+                                <h3 style={{ color: '#dc3545', margin: '0 0 10px 0' }}>🚨 Execution Error</h3>
+                                <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'monospace', color: '#ff8a8a', margin: 0 }}>
+                                    {result.feedback}
+                                </pre>
+                            </div>
+                        ) : (
+                            // ✅ THIS IS YOUR EXISTING GRADING UI ✅
+                            <div style={{ padding: '15px', backgroundColor: '#2d2d2d', borderRadius: '4px', border: '1px solid #444' }}>
+                                <h3 style={{
+                                    color: result.status === 'Passed' ? '#28a745' : '#dc3545',
+                                    margin: '0 0 15px 0'
+                                }}>
+                                    {result.status === 'Passed' ? '✅ Accepted' : '❌ Wrong Answer'}
+                                </h3>
 
-                            <p style={{ margin: '0 0 15px 0', fontSize: '1.1rem', color: '#d4d4d4' }}>
-                                Passed: <strong>{result.passedTests ?? 0} / {result.totalTests ?? 0}</strong>
-                            </p>
-
-                            {typeof result.scorePercentage === 'number' && (
-                                <p style={{ margin: '0 0 15px 0', color: '#4da6ff', fontWeight: 'bold' }}>
-                                    Score: {result.scorePercentage}%
-                                    {typeof result.awardedPoints === 'number' ? ` • Awarded ${result.awardedPoints} pts` : ''}
+                                <p style={{ margin: '0 0 15px 0', fontSize: '1.1rem', color: '#d4d4d4' }}>
+                                    Passed: <strong>{result.passedTests ?? 0} / {result.totalTests ?? 0}</strong>
                                 </p>
-                            )}
 
-                            {result.testResults && (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                    {result.testResults.map((tc) => (
-                                        <div key={tc.testNumber} style={{
-                                            padding: '10px',
-                                            backgroundColor: '#1e1e1e',
-                                            borderLeft: `4px solid ${tc.passed ? '#28a745' : '#dc3545'}`,
-                                            color: '#d4d4d4',
-                                            borderRadius: '3px',
-                                            fontSize: '0.95rem'
-                                        }}>
-                                            <strong>Test Case {tc.testNumber}:</strong> {tc.passed ? '✅ Passed' : '❌ Failed'}
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
+                                {typeof result.scorePercentage === 'number' && (
+                                    <p style={{ margin: '0 0 15px 0', color: '#4da6ff', fontWeight: 'bold' }}>
+                                        Score: {result.scorePercentage}%
+                                        {typeof result.awardedPoints === 'number' ? ` • Awarded ${result.awardedPoints} pts` : ''}
+                                    </p>
+                                )}
+
+                                {result.testResults && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                        {result.testResults.map((tc) => (
+                                            <div key={tc.testNumber} style={{
+                                                padding: '10px',
+                                                backgroundColor: '#1e1e1e',
+                                                borderLeft: `4px solid ${tc.passed ? '#28a745' : '#dc3545'}`,
+                                                color: '#d4d4d4',
+                                                borderRadius: '3px',
+                                                fontSize: '0.95rem'
+                                            }}>
+                                                <strong>Test Case {tc.testNumber}:</strong> {tc.passed ? '✅ Passed' : '❌ Failed'}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )
                     ) : (
                         <div style={{ color: '#777', fontStyle: 'italic' }}>Run your code to see the execution results here.</div>
                     )}

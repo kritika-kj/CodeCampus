@@ -91,6 +91,36 @@ function ContestManager() {
         setSelectedContestId(contestId);
         setViewMode('edit');
     };
+
+    const handleManualClose = async (contestId) => {
+        console.log('Button was physically clicked!');
+        const confirmClose = window.confirm('Are you sure you want to end this contest early for everyone?');
+        if (!confirmClose) return;
+
+        try {
+            const response = await fetch(`http://localhost:5174/api/contest/${contestId}/close-manually`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                alert('Contest manually ended.');
+                setActiveContests(prev =>
+                    prev.map(contest =>
+                        contest.id === contestId ? { ...contest, isActive: false } : contest
+                    )
+                );
+            } else {
+                const data = await response.json();
+                alert(`Failed to close: ${data.message}`);
+            }
+        } catch (error) {
+            console.error('Network error:', error);
+            alert('Failed to connect to the server.');
+        }
+    };
     const handleProcessContest = async (startImmediately) => {
         if (!contestTitle || selectedChallengeIds.length === 0 || durationInMinutes <= 0) {
             setStatusMessage('❌ Please provide a title, a valid duration, and select at least one challenge.');
@@ -173,6 +203,8 @@ function ContestManager() {
                                     <th style={thStyle}>Contest Title</th>
                                     <th style={thStyle}>Problems Included</th>
                                     <th style={thStyle}>Status</th>
+                                    <th style={thStyle}>Actions</th>
+                                    <th style={thStyle}>Manual Close</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -195,6 +227,24 @@ function ContestManager() {
                                                 style={{ padding: '6px 12px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
                                             >
                                                 View Details
+                                            </button>
+                                        </td>
+                                        <td style={tdStyle}>
+                                            <button
+                                                onClick={() => handleManualClose(c.id)}
+                                                disabled={!c.isActive}
+                                                style={{
+                                                    padding: '6px 12px',
+                                                    backgroundColor: c.isActive ? '#dc3545' : '#adb5bd',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    borderRadius: '4px',
+                                                    cursor: c.isActive ? 'pointer' : 'not-allowed',
+                                                    fontWeight: 'bold',
+                                                    opacity: c.isActive ? 1 : 0.7
+                                                }}
+                                            >
+                                                🛑 Stop
                                             </button>
                                         </td>
                                     </tr>
@@ -268,8 +318,8 @@ function ContestManager() {
 
 // STYLES
 const inputStyle = { display: 'block', width: '100%', padding: '12px', borderRadius: '4px', border: '1px solid #ccc', boxSizing: 'border-box', fontSize: '1rem' };
-const labelStyle = { display: 'block', fontWeight: 'bold', marginBottom: '8px', color: '#333' };
-const thStyle = { padding: '12px 15px', color: '#555', fontWeight: 'bold' };
-const tdStyle = { padding: '12px 15px', verticalAlign: 'middle' };
+const labelStyle = { display: 'block', fontWeight: 'bold', marginBottom: '8px', color: '#000000' };
+const thStyle = { padding: '12px 15px', color: '#060606', fontWeight: 'bold' };
+const tdStyle = { padding: '12px 15px', verticalAlign: 'middle',fontWeight: 'bold', color: '#5f5f5f'};
 
 export default ContestManager;

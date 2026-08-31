@@ -23,6 +23,8 @@ function ContestResults() {
         };
 
         fetchLeaderboard();
+        const pollInterval = setInterval(fetchLeaderboard, 10000);
+        return () => clearInterval(pollInterval);
     }, [contestId]);
 
     if (isLoading) return <div style={{ padding: '50px', textAlign: 'center' }}>Calculating final scores...</div>;
@@ -30,7 +32,7 @@ function ContestResults() {
     return (
         <div style={{ padding: '40px', maxWidth: '900px', margin: '0 auto', fontFamily: 'sans-serif' }}>
             <h1 style={{ textAlign: 'center', marginBottom: '30px' }}>Contest #{contestId} Leaderboard</h1>
-            
+
             {leaderboard.length === 0 ? (
                 <p style={{ textAlign: 'center', color: '#666' }}>No successful submissions yet.</p>
             ) : (
@@ -45,16 +47,18 @@ function ContestResults() {
                     </thead>
                     <tbody>
                         {leaderboard.map((student, index) => {
-                            const displayName = student.name || student.userName || `Student ${student.userId}`;
-                            const score = student.score ?? student.totalScore ?? 0;
                             const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
 
                             return (
                                 <tr key={student.userId} style={{ borderBottom: '1px solid #ddd' }}>
-                                    <td style={{ padding: '12px', fontWeight: 'bold' }}>{medal ? `${medal} #${student.rank ?? index + 1}` : `#${student.rank ?? index + 1}`}</td>
-                                    <td style={{ padding: '12px' }}>{displayName}</td>
-                                    <td style={{ padding: '12px' }}>{student.problemsSolved ?? 0}</td>
-                                    <td style={{ padding: '12px', color: '#28a745', fontWeight: 'bold' }}>{score} pts</td>
+                                    <td style={{ padding: '12px', fontWeight: 'bold' }}>
+                                        {medal ? `${medal} #${student.rank}` : `#${student.rank}`}
+                                    </td>
+                                    <td style={{ padding: '12px' }}>{student.name}</td>
+                                    <td style={{ padding: '12px' }}>{student.problemsSolved}</td>
+                                    <td style={{ padding: '12px', color: '#28a745', fontWeight: 'bold' }}>
+                                        {student.score} pts
+                                    </td>
                                 </tr>
                             );
                         })}
@@ -63,7 +67,7 @@ function ContestResults() {
             )}
 
             <div style={{ textAlign: 'center', marginTop: '30px' }}>
-                <button 
+                <button
                     onClick={() => navigate('/dashboard')}
                     style={{ padding: '10px 20px', backgroundColor: '#333', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
                 >
