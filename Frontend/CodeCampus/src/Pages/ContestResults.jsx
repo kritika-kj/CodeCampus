@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 
 function ContestResults() {
     const { contestId } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
+    
+    // 1. Extract the viewMode from the router state (defaults to contestant if directly visited)
+    const viewMode = location.state?.viewMode || 'contestant';
+    const isAdmin = viewMode === 'admin';
+
     const [leaderboard, setLeaderboard] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -43,6 +49,9 @@ function ContestResults() {
                             <th style={{ padding: '12px' }}>Player</th>
                             <th style={{ padding: '12px' }}>Challenges Solved</th>
                             <th style={{ padding: '12px' }}>Score</th>
+                            
+                            {/* 2. Conditionally render the Admin Header */}
+                            {isAdmin && <th style={{ padding: '12px' }}>Actions</th>}
                         </tr>
                     </thead>
                     <tbody>
@@ -59,16 +68,28 @@ function ContestResults() {
                                     <td style={{ padding: '12px', color: '#28a745', fontWeight: 'bold' }}>
                                         {student.score} pts
                                     </td>
+                                    
+                                    {/* 3. Conditionally render the Admin Action Button */}
+                                    {isAdmin && (
+                                        <td style={{ padding: '12px' }}>
+                                            <button 
+                                                onClick={() => navigate(`/admin/student/${student.userId}`)}
+                                                style={{ padding: '6px 12px', backgroundColor: '#17a2b8', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem' }}
+                                            >
+                                                View Details
+                                            </button>
+                                        </td>
+                                    )}
                                 </tr>
                             );
                         })}
                     </tbody>
                 </table>
             )}
-
+            
             <div style={{ textAlign: 'center', marginTop: '30px' }}>
                 <button
-                    onClick={() => navigate('/dashboard')}
+                    onClick={() => navigate(isAdmin ? '/dashboard' : '/dashboard/review')}
                     style={{ padding: '10px 20px', backgroundColor: '#333', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
                 >
                     Return to Dashboard

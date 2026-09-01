@@ -133,6 +133,150 @@ namespace CodeCampus.Controllers
                 return StatusCode(500, new { status = "Error", feedback = $"Internal Server Error: {ex.Message}" });
             }
         }
+        //[HttpPost("submit")]
+        //public async Task<IActionResult> SubmitCode([FromBody] SubmitRequest request)
+        //{
+        //    var newSubmission = new Submission
+        //    {
+        //        UserId = request.UserId,
+        //        ChallengeId = request.ChallengeId,
+        //        ContestId = request.ContestId,
+        //        SourceCode = request.SourceCode,
+        //        Language = request.Language,
+        //        CreatedAt = DateTime.UtcNow,
+        //        //AwardedPoints= request.awardedPoints
+        //    };
+
+        //    var contest = await _context.Contests.FindAsync(request.ContestId);
+        //    if (contest != null && contest.EndTime.HasValue && DateTime.UtcNow > contest.EndTime.Value)
+        //    {
+        //        return BadRequest(new
+        //        {
+        //            status = "Failed",
+        //            message = "Time is up! The contest has officially ended."
+        //        });
+        //    }
+
+        //    var testCases = await _context.TestCases
+        //        .Where(t => t.ChallengeId == request.ChallengeId)
+        //        .OrderBy(t => t.Id)
+        //        .ToListAsync();
+
+        //    if (!testCases.Any()) return NotFound("No test cases found.");
+
+        //    var inputBuilder = new StringBuilder();
+        //    inputBuilder.AppendLine(testCases.Count.ToString());
+        //    foreach (var tc in testCases)
+        //    {
+        //        string cleanInput = tc.InputData.Replace("\r\n", "\n").TrimEnd();
+        //        inputBuilder.AppendLine(cleanInput);
+        //    }
+        //    string finalInput = inputBuilder.ToString();
+
+        //    try
+        //    {
+        //        int judge0LangId = newSubmission.Language.ToLower() switch
+        //        {
+        //            "csharp" => 51,
+        //            "java" => 62,
+        //            "python" => 71,
+        //            _ => 51
+        //        };
+
+        //        var apiPayload = new
+        //        {
+        //            source_code = newSubmission.SourceCode,
+        //            language_id = judge0LangId,
+        //            stdin = finalInput
+        //        };
+
+        //        string jsonPayload = JsonSerializer.Serialize(apiPayload);
+        //        var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+        //        var response = await _httpClient.PostAsync("http://localhost:2358/submissions?wait=true&base64_encoded=false", content);
+
+        //        if (!response.IsSuccessStatusCode)
+        //        {
+        //            newSubmission.Status = "Error";
+        //            newSubmission.Feedback = "Execution Engine Error.";
+        //        }
+        //        else
+        //        {
+        //            string apiResponseString = await response.Content.ReadAsStringAsync();
+        //            using JsonDocument doc = JsonDocument.Parse(apiResponseString);
+        //            var root = doc.RootElement;
+
+        //            string actualOutput = root.TryGetProperty("stdout", out var stdoutProp) && stdoutProp.ValueKind != JsonValueKind.Null ? stdoutProp.GetString()?.Trim() ?? "" : "";
+        //            string errorOutput = root.TryGetProperty("stderr", out var stderrProp) && stderrProp.ValueKind != JsonValueKind.Null ? stderrProp.GetString()?.Trim() ?? "" : "";
+        //            string compileError = root.TryGetProperty("compile_output", out var compileProp) && compileProp.ValueKind != JsonValueKind.Null ? compileProp.GetString()?.Trim() ?? "" : "";
+
+        //            string fullError = string.IsNullOrEmpty(errorOutput) ? compileError : errorOutput;
+
+        //            if (!string.IsNullOrEmpty(fullError))
+        //            {
+        //                newSubmission.Status = "Failed";
+        //                newSubmission.Feedback = $"⚠️ Code Error:\n{fullError}";
+        //            }
+        //            else
+        //            {
+        //                // 3. Grade all test cases
+        //                string[] userOutputLines = actualOutput.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        //                int passedCount = 0;
+
+        //                for (int i = 0; i < testCases.Count; i++)
+        //                {
+        //                    if (i < userOutputLines.Length)
+        //                    {
+        //                        if (testCases[i].ExpectedOutput.Trim() == userOutputLines[i].Trim())
+        //                        {
+        //                            passedCount++;
+        //                        }
+        //                    }
+        //                }
+
+        //                int totalTests = testCases.Count;
+        //                int percentage = totalTests == 0 ? 0 : (int)Math.Round((double)passedCount / totalTests * 100);
+        //                var challenge = await _context.Challenges.FindAsync(request.ChallengeId);
+        //                int challengePoints = challenge?.Points ?? 0;
+        //                int awardedPoints = totalTests == 0
+        //                    ? 0
+        //                    : (passedCount == totalTests ? challengePoints : (int)Math.Round((double)passedCount / totalTests * challengePoints));
+
+        //                if (passedCount == totalTests)
+        //                {
+        //                    newSubmission.Status = "Passed";
+        //                    newSubmission.Feedback = $"✅ Success! All {totalTests} test cases passed. Awarded {challengePoints} points.";
+        //                }
+        //                else
+        //                {
+        //                    newSubmission.Status = "Failed";
+        //                    newSubmission.Feedback = $"❌ Failed. Passed {passedCount} out of {totalTests} test cases ({percentage}%). Partial credit: {awardedPoints} points.";
+        //                }
+        //                newSubmission.AwardedPoints = awardedPoints;
+        //                _context.Submissions.Add(newSubmission);
+        //                await _context.SaveChangesAsync();
+
+        //                return Ok(new
+        //                {
+        //                    message = "Submission graded and saved successfully!",
+        //                    submissionId = newSubmission.Id,
+        //                    status = newSubmission.Status,
+        //                    passedTests = passedCount,
+        //                    totalTests = totalTests,
+        //                    scorePercentage = percentage,
+        //                    awardedPoints = awardedPoints,
+        //                    challengePoints = challengePoints
+        //                });
+        //            }
+        //        }
+
+        //        return Ok(new { message = "Submission graded and saved successfully!", submissionId = newSubmission.Id, status = newSubmission.Status });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, new { message = "Database error saving submission.", details = ex.Message });
+        //    }
+        //}
         [HttpPost("submit")]
         public async Task<IActionResult> SubmitCode([FromBody] SubmitRequest request)
         {
@@ -143,8 +287,8 @@ namespace CodeCampus.Controllers
                 ContestId = request.ContestId,
                 SourceCode = request.SourceCode,
                 Language = request.Language,
-                CreatedAt = DateTime.UtcNow,
-                AwardedPoints= request.awardedPoints
+                CreatedAt = DateTime.UtcNow
+                // AwardedPoints removed from here to prevent frontend manipulation
             };
 
             var contest = await _context.Contests.FindAsync(request.ContestId);
@@ -219,7 +363,6 @@ namespace CodeCampus.Controllers
                     }
                     else
                     {
-                        // 3. Grade all test cases
                         string[] userOutputLines = actualOutput.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
                         int passedCount = 0;
 
@@ -238,9 +381,11 @@ namespace CodeCampus.Controllers
                         int percentage = totalTests == 0 ? 0 : (int)Math.Round((double)passedCount / totalTests * 100);
                         var challenge = await _context.Challenges.FindAsync(request.ChallengeId);
                         int challengePoints = challenge?.Points ?? 0;
-                        int awardedPoints = totalTests == 0
-                            ? 0
-                            : (passedCount == totalTests ? challengePoints : (int)Math.Round((double)passedCount / totalTests * challengePoints));
+
+                        // CHANGED: awardedPoints is now a double and rounds to 2 decimal places instead of casting to int
+                        double awardedPoints = totalTests == 0
+                            ? 0.0
+                            : (passedCount == totalTests ? challengePoints : Math.Round((double)passedCount / totalTests * challengePoints, 2));
 
                         if (passedCount == totalTests)
                         {
@@ -253,6 +398,8 @@ namespace CodeCampus.Controllers
                             newSubmission.Feedback = $"❌ Failed. Passed {passedCount} out of {totalTests} test cases ({percentage}%). Partial credit: {awardedPoints} points.";
                         }
 
+                        newSubmission.AwardedPoints = awardedPoints;
+
                         _context.Submissions.Add(newSubmission);
                         await _context.SaveChangesAsync();
 
@@ -264,7 +411,7 @@ namespace CodeCampus.Controllers
                             passedTests = passedCount,
                             totalTests = totalTests,
                             scorePercentage = percentage,
-                            awardedPoints = awardedPoints,
+                            awardedPoints = awardedPoints, // This will now send as a decimal (e.g., 1.67)
                             challengePoints = challengePoints
                         });
                     }

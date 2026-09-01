@@ -117,8 +117,8 @@ namespace CodeCampus.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AwardedPoints")
-                        .HasColumnType("int");
+                    b.Property<double>("AwardedPoints")
+                        .HasColumnType("float");
 
                     b.Property<int>("ChallengeId")
                         .HasColumnType("int");

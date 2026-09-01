@@ -53,5 +53,24 @@ namespace CodeCampus.Controllers
 
             return Ok(new {message = "user role updated successfully" });
         }
+        [HttpGet("allcontest")]
+        public async Task<IActionResult> GetAllContests()
+        {
+            var allcontests = await _context.Contests
+                .Select(c => new
+                {
+                    c.Id,
+                    c.Title,
+                    c.StartTime,
+                    c.IsActive,
+                    StudentCount = _context.Submissions
+                     .Where(s => s.ContestId == c.Id)
+                    .Select(s => s.UserId)
+                    .Distinct()
+                    .Count()
+                })
+                .ToListAsync();
+            return Ok(allcontests);
+        }
     }
 }

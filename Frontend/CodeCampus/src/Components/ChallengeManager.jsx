@@ -134,7 +134,7 @@ function ChallengeManager() {
                                     <th style={thStyle}>Title</th>
                                     <th style={thStyle}>Difficulty</th>
                                     <th style={thStyle}>Points</th>
-                                    <th style={thStyle}>Actions</th>
+                                    {/* <th style={thStyle}>Actions</th> */}
                                 </tr>
                             </thead>
                             <tbody>
@@ -152,10 +152,10 @@ function ChallengeManager() {
                                             </span>
                                         </td>
                                         <td style={tdStyle}>{c.points} pts</td>
-                                        <td style={tdStyle}>
+                                        {/* <td style={tdStyle}>
                                             <button style={{...actionBtnStyle, color: '#007bff'}}>Edit</button>
                                             <button style={{...actionBtnStyle, color: '#dc3545'}}>Delete</button>
-                                        </td>
+                                        </td> */}
                                     </tr>
                                 ))}
                             </tbody>

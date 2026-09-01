@@ -10,6 +10,9 @@ import JoinContest from './Components/JoinContest';
 import Submissions from './Pages/Submissions';
 import ContestHub from './Pages/ContestHub'; 
 import ContestResults from './Pages/ContestResults';
+import ViewContestDetails from './Pages/ViewContestDetails';
+import ViewChallengeDetails from './Pages/ViewChallengeDetails';
+import AllContestPage from './Pages/AllContestPage';
 // import { BrowserRouter, Routes } from 'react-router-dom';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import UserManagement from './Components/UserManagement';
@@ -55,9 +58,12 @@ function App() {
           <Route path="contests" element={<ContestManager />} />
           <Route path="join" element={<JoinContest />} />
           <Route path="submissions" element={  userRole === "Contestant" ? <Submissions /> : <Navigate to="/dashboard" replace />  } />
+          <Route path="submissions/:contestId/details" element={  userRole === "Contestant" ? <ViewContestDetails /> : <Navigate to="/dashboard" replace />  } />
+          <Route path="submissions/:contestId/:challengeId/details" element={  userRole === "Contestant" ? <ViewChallengeDetails /> : <Navigate to="/dashboard" replace />  } />
+          <Route path="review" element={  isAuthenticated ? <AllContestPage /> : <Navigate to="/login"/>  } />
           <Route path="settings" element = {  userRole === "Admin"? <UserManagement/>: <Navigate to ="/dashboard" replace />}/>
         </Route>
-        <Route path="/contest/:contestId" element={  isAuthenticated ? <ContestHub /> : <Navigate to="/login" />} />   
+        <Route path="/contest/:contestId" element={  isAuthenticated ? <ContestHub /> : <Navigate to="/login" />} />
         <Route path="/workspace/:contestId/:challengeId" element={  isAuthenticated ? <CodeWorkspace /> : <Navigate to="/login" />  } />       
         <Route path="/results/:contestId" element={  isAuthenticated ? <ContestResults /> : <Navigate to="/login" />  } />
       </Routes>

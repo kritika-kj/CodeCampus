@@ -1,6 +1,7 @@
 ﻿using CodeCampus.Data;
 using CodeCampus.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -298,6 +299,56 @@ namespace CodeCampus.Controllers
 
 
             return Ok(Submission);
+        }
+        [HttpGet("{id}/viewsubmissions/{ContestId}")]
+        public async Task<IActionResult> ViewContestDetails(int id, int ContestId)
+        {
+            var ContestDetails = await _context.Submissions
+                .Where(s => s.UserId == id && s.ContestId == ContestId)
+                .Select(s => new
+                {
+                    s.Id,
+                    s.ChallengeId,
+                    ChallengeTitle = _context.Challenges.Where(c => c.Id == s.ChallengeId).Select(c => c.Title).FirstOrDefault(),
+                    s.AwardedPoints,
+                    s.Feedback,
+                    s.CreatedAt
+                })
+                .ToListAsync();
+            return Ok(ContestDetails);
+        }
+        [HttpGet("{id}/{ContestId}/{ChallengeId}/viewchallenge")]
+        public async Task<IActionResult> ViewChallenge(int id,int ContestId, int ChallengeId)
+        {
+            var Challenge = await _context.Submissions
+                .Where(c => c.UserId == id && c.ContestId == ContestId && c.ChallengeId == ChallengeId)
+                .Select(c => new
+                {
+                    c.SourceCode,
+                    c.Status,
+                    c.AwardedPoints
+                })
+                .FirstOrDefaultAsync();
+            return Ok(Challenge);
+        }
+        [HttpGet("allcontest")]
+        public async Task<IActionResult> GetAllContestsforreview()
+        {
+            var allcontests = await _context.Contests
+                .Select(c => new
+                {
+                    c.Id,
+                    c.Title,
+                    c.StartTime,
+                    c.IsActive,
+                    StudentCount = _context.Submissions
+                     .Where(s => s.ContestId == c.Id)
+                    .Select(s => s.UserId)
+                    .Distinct()
+                    .Count()
+                })
+                .ToListAsync();
+            return Ok(allcontests);
         }
     }
 }

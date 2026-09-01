@@ -3,11 +3,17 @@ import { useNavigate } from "react-router-dom";
 
 function Submissions() {
     const [submissions, setSubmissions] = useState([]);
+    const navigate = useNavigate();
     const activeUserId = sessionStorage.getItem('userId')
+    
+    const GetSubmissionDetails = (contestId) => {
+        navigate(`/dashboard/submissions/${contestId}/details`);
+    };
+
     useEffect(() => {
         const fetchSubmissions = async () => {
             try {
-                const response = await fetch(`http://localhost:5174/api/Contest/${activeUserId}/viewsubmissions`);
+                const response = await fetch(`http://localhost:5174/api/Contest/${activeUserId}/viewsubmissions/`);
                 if (response.ok) {
                     const data = await response.json();
                     setSubmissions(data);
@@ -20,9 +26,13 @@ function Submissions() {
         };
         fetchSubmissions();
     }, []);
+
+    //working....................................
     // const GetSubmissionDetails = async (contestId) => {
     //     try {
     // };
+
+    //..............................................
     return (
         <div style={{ maxWidth: '900px', margin: '0 auto', padding: '20px' }}>
             <button onClick={() => navigate('/dashboard')} style={{ marginBottom: '20px', background: 'none', border: 'none', color: '#007bff', cursor: 'pointer', textDecoration: 'underline' }}>
