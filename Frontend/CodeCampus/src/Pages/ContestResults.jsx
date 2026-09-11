@@ -5,10 +5,10 @@ function ContestResults() {
     const { contestId } = useParams();
     const navigate = useNavigate();
     const location = useLocation();
-    
+
     // 1. Extract the viewMode from the router state (defaults to contestant if directly visited)
     const viewMode = location.state?.viewMode || 'contestant';
-    const isAdmin = viewMode === 'admin';
+    const isModerator = viewMode === 'mod';
 
     const [leaderboard, setLeaderboard] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -36,60 +36,61 @@ function ContestResults() {
     if (isLoading) return <div style={{ padding: '50px', textAlign: 'center' }}>Calculating final scores...</div>;
 
     return (
-        <div style={{ padding: '40px', maxWidth: '900px', margin: '0 auto', fontFamily: 'sans-serif' }}>
+        // <div style={{ padding: '40px', maxWidth: '900px', margin: '0 auto', fontFamily: 'sans-serif' }}>
+        <div className="dashboard-container">
             <h1 style={{ textAlign: 'center', marginBottom: '30px' }}>Contest #{contestId} Leaderboard</h1>
 
             {leaderboard.length === 0 ? (
                 <p style={{ textAlign: 'center', color: '#666' }}>No successful submissions yet.</p>
             ) : (
-                <table style={{ width: '100%', borderCollapse: 'collapse', backgroundColor: 'white', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}>
-                    <thead>
-                        <tr style={{ backgroundColor: '#007bff', color: 'white', textAlign: 'left' }}>
-                            <th style={{ padding: '12px' }}>Rank</th>
-                            <th style={{ padding: '12px' }}>Player</th>
-                            <th style={{ padding: '12px' }}>Challenges Solved</th>
-                            <th style={{ padding: '12px' }}>Score</th>
-                            
-                            {/* 2. Conditionally render the Admin Header */}
-                            {isAdmin && <th style={{ padding: '12px' }}>Actions</th>}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {leaderboard.map((student, index) => {
-                            const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
+                <div style={{ background: 'rgb(15, 23, 42)', borderRadius: '10px', overflow: 'hidden', border: '1px solid rgba(74, 222, 128, 0.25)' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                        <thead>
+                            <tr style={{ backgroundColor: 'rgba(20, 20, 20, 0.9)' }}>
+                                <th style={thStyle}>Rank</th>
+                                <th style={thStyle}>Player</th>
+                                <th style={thStyle}>Challenges Solved</th>
+                                <th style={thStyle}>Score</th>
 
-                            return (
-                                <tr key={student.userId} style={{ borderBottom: '1px solid #ddd' }}>
-                                    <td style={{ padding: '12px', fontWeight: 'bold' }}>
-                                        {medal ? `${medal} #${student.rank}` : `#${student.rank}`}
-                                    </td>
-                                    <td style={{ padding: '12px' }}>{student.name}</td>
-                                    <td style={{ padding: '12px' }}>{student.problemsSolved}</td>
-                                    <td style={{ padding: '12px', color: '#28a745', fontWeight: 'bold' }}>
-                                        {student.score} pts
-                                    </td>
-                                    
-                                    {/* 3. Conditionally render the Admin Action Button */}
-                                    {isAdmin && (
-                                        <td style={{ padding: '12px' }}>
-                                            <button 
-                                                onClick={() => navigate(`/admin/student/${student.userId}`)}
-                                                style={{ padding: '6px 12px', backgroundColor: '#17a2b8', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem' }}
-                                            >
-                                                View Details
-                                            </button>
+                                {isModerator && <th style={thStyle}>Actions</th>}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {leaderboard.map((student, index) => {
+                                const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
+
+                                return (
+                                    <tr key={student.userId} style={{ borderBottom: '1px solid rgba(148, 163, 184, 0.2)' }}>
+                                        <td style={{ ...tdStyle, fontWeight: 'bold' }}>
+                                            {medal ? `${medal} #${student.rank}` : `#${student.rank}`}
                                         </td>
-                                    )}
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
+                                        <td style={tdStyle}>{student.name}</td>
+                                        <td style={tdStyle}>{student.problemsSolved}</td>
+                                        <td style={{ ...tdStyle, color: '#4ade80', fontWeight: 'bold' }}>
+                                            {student.score} pts
+                                        </td>
+
+                                        {isModerator && (
+                                            <td style={tdStyle}>
+                                                <button
+                                                    onClick={() => navigate(`/mod/student/${contestId}/${student.userId}`)}
+                                                    style={{ padding: '6px 12px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' }}
+                                                >
+                                                    View Details
+                                                </button>
+                                            </td>
+                                        )}
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
             )}
-            
+
             <div style={{ textAlign: 'center', marginTop: '30px' }}>
                 <button
-                    onClick={() => navigate(isAdmin ? '/dashboard' : '/dashboard/review')}
+                    onClick={() => navigate(isModerator ? '/dashboard/review' : '/dashboard')}
                     style={{ padding: '10px 20px', backgroundColor: '#333', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
                 >
                     Return to Dashboard
@@ -100,3 +101,6 @@ function ContestResults() {
 }
 
 export default ContestResults;
+
+const thStyle = { padding: '12px 15px', borderBottom: '1px solid rgba(148, 163, 184, 0.2)', color: '#4ade80', fontWeight: 'bold' };
+const tdStyle = { padding: '12px 15px', verticalAlign: 'top', color: '#e2e8f0', background: 'rgba(15, 23, 42, 0.2)' };

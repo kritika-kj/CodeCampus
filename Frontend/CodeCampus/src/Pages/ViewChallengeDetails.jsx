@@ -3,15 +3,16 @@ import { useParams, useNavigate } from 'react-router-dom';
 import './Dashboard.css';
 
 function ViewChallengeDetails() {
-    const { contestId, challengeId } = useParams();
+    const { contestId, userId, challengeId } = useParams();
     const navigate = useNavigate();
     const [challengeDetails, setChallengeDetails] = useState(null);
     const activeUserId = sessionStorage.getItem('userId');
+    const submissionUserId = userId || activeUserId;
 
     useEffect(() => {
         const fetchChallengeDetails = async () => {
             try {
-                const response = await fetch(`http://localhost:5174/api/contest/${activeUserId}/${contestId}/${challengeId}/viewchallenge`);
+                const response = await fetch(`http://localhost:5174/api/contest/${submissionUserId}/${contestId}/${challengeId}/viewchallenge`);
                 if (response.ok) {
                     const data = await response.json();
                     setChallengeDetails(data);
@@ -23,7 +24,7 @@ function ViewChallengeDetails() {
             }
         };
         fetchChallengeDetails();
-    }, [challengeId, contestId, activeUserId]);
+    }, [challengeId, contestId, submissionUserId]);
 
     if (!challengeDetails) return <div style={{ padding: '50px', textAlign: 'center', color: '#e2e8f0' }}>Loading challenge details...</div>;
 

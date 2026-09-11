@@ -13,6 +13,7 @@ import ContestResults from './Pages/ContestResults';
 import ViewContestDetails from './Pages/ViewContestDetails';
 import ViewChallengeDetails from './Pages/ViewChallengeDetails';
 import AllContestPage from './Pages/AllContestPage';
+import StudentSubmissionDetails from './Pages/StudentSubmissionDetails';
 // import { BrowserRouter, Routes } from 'react-router-dom';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import UserManagement from './Components/UserManagement';
@@ -60,12 +61,14 @@ function App() {
           <Route path="submissions" element={  userRole === "Contestant" ? <Submissions /> : <Navigate to="/dashboard" replace />  } />
           <Route path="submissions/:contestId/details" element={  userRole === "Contestant" ? <ViewContestDetails /> : <Navigate to="/dashboard" replace />  } />
           <Route path="submissions/:contestId/:challengeId/details" element={  userRole === "Contestant" ? <ViewChallengeDetails /> : <Navigate to="/dashboard" replace />  } />
-          <Route path="review" element={  isAuthenticated ? <AllContestPage /> : <Navigate to="/login"/>  } />
+          <Route path="review" element={  userRole === "Moderator" ? <AllContestPage /> : <Navigate to="/dashboard" replace />  } />
           <Route path="settings" element = {  userRole === "Admin"? <UserManagement/>: <Navigate to ="/dashboard" replace />}/>
         </Route>
         <Route path="/contest/:contestId" element={  isAuthenticated ? <ContestHub /> : <Navigate to="/login" />} />
         <Route path="/workspace/:contestId/:challengeId" element={  isAuthenticated ? <CodeWorkspace /> : <Navigate to="/login" />  } />       
         <Route path="/results/:contestId" element={  isAuthenticated ? <ContestResults /> : <Navigate to="/login" />  } />
+        <Route path="/mod/student/:contestId/:userId" element={  userRole === "Moderator" ? <StudentSubmissionDetails /> : <Navigate to="/dashboard" replace />  } />
+        <Route path="/mod/student/:contestId/:userId/:challengeId" element={  userRole === "Moderator" ? <ViewChallengeDetails /> : <Navigate to="/dashboard" replace />  } />
       </Routes>
     </BrowserRouter>
   );

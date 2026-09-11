@@ -29,6 +29,7 @@ namespace CodeCampus.Controllers
                 Points = request.Points,
                 InputFormat = request.InputFormat,
                 OutputFormat = request.OutputFormat,
+                Constraints = request.Constraints,
 
                 // Map the DTOs to your actual SQL entities
                 TestCases = request.TestCases.Select(tc => new TestCase
@@ -94,6 +95,7 @@ namespace CodeCampus.Controllers
             public int Points { get; set; }
             public string InputFormat { get; set; }
             public string OutputFormat { get; set; }
+            public string Constraints { get; set; }
 
             // The incoming array from React
             public List<TestCaseDto> TestCases { get; set; } = new List<TestCaseDto>();

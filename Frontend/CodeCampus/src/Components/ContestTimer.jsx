@@ -7,8 +7,13 @@ function ContestTimer({ endTime, onTimeUp }) {
     useEffect(() => {
         if (!endTime) return;
 
+        // Contest timestamps are stored in UTC but may be returned without an offset.
+        const normalizedEndTime = /(?:Z|[+-]\d{2}:?\d{2})$/.test(endTime)
+            ? endTime
+            : `${endTime}Z`;
+
         const timer = setInterval(() => {
-            const end = new Date(endTime).getTime();
+            const end = new Date(normalizedEndTime).getTime();
             const now = new Date().getTime();
             const distance = end - now;
 

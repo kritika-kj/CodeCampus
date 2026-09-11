@@ -47,7 +47,8 @@ export default function UserManagement() {
         <div style={{ padding: '20px', maxWidth: '900px', margin: '0 auto' }}>
             <h2 style={{ borderBottom: '2px solid #ccc', paddingBottom: '10px' }}>User Management</h2>
             {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-            <table>
+            <div className="user-management-table">
+            <table className="data-table">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -62,12 +63,12 @@ export default function UserManagement() {
                             <td>{user.name}</td>
                             <td>{user.email}</td>
                             <td>
-                                <span style={{ color: user.role === 'Moderator' ? 'bule' : 'black' }}>
+                                <span className={user.role === 'Moderator' ? 'role-badge-admin' : 'role-badge-contestant'}>
                                     {user.role}
                                 </span>
                             </td>
                             <td>
-                                <select value={user.role}
+                                <select className="role-select" value={user.role}
                                     onChange={(e) => handleRoleChange(user.id, e.target.value)}
                                 >
                                     <option value="Contestant">Contestant</option>
@@ -79,6 +80,7 @@ export default function UserManagement() {
                 </tbody>
 
             </table>
+            </div>
         </div>
 
     );

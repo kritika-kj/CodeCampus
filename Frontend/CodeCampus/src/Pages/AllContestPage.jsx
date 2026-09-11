@@ -37,7 +37,7 @@ function AllContestPage() {
     }, []);
 
     const handleViewDetails = (contestId) => {
-        navigate(`/results/${contestId}`, { state: { viewMode: 'admin' } });
+        navigate(`/results/${contestId}`, { state: { viewMode: 'mod' } });
     };
 
     if (isLoading) {

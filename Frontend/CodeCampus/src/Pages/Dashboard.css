@@ -134,21 +134,30 @@ body {
     margin-top: 20px;
 }
 
+.user-management-table {
+    background: rgb(15, 23, 42);
+    border: 1px solid rgba(74, 222, 128, 0.25);
+    border-radius: 10px;
+    overflow-x: auto;
+}
+
 .data-table th {
     background-color: #141414; 
     color: #4ade80; 
-    border-bottom: 2px solid #4ade80;
-    padding: 15px;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+    padding: 12px 15px;
 }
 
 .data-table td {
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
     color: #e2e8f0;
-    padding: 15px;
+    padding: 12px 15px;
+    background: rgba(15, 23, 42, 0.2);
+    vertical-align: top;
 }
 
 .data-table tr:hover {
-    background-color: #2b303b; 
+    background-color: rgba(30, 41, 59, 0.85);
 }
 
 .role-select {

@@ -3,9 +3,9 @@ import ContestTimer from '../Components/ContestTimer';
 import { useNavigate, useParams } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
 const BOILERPLATE_CODE = {
-    csharp: '// Write your code here...\nusing System;\n\npublic class Program {\n    public static void Main() {\n        Console.WriteLine("Hello CodeCampus!");\n    }\n}',
-    java: '// Write your code here...\npublic class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello CodeCampus!");\n    }\n}',
-    python: '# Write your code here...\nprint("Hello CodeCampus!")'
+    csharp: 'using System;\n\npublic class Program {\n    public static void Main() {\n        // Write your code here...\n    }\n}',
+    java: 'public class Main {\n    public static void main(String[] args) {\n        // Write your code here...\n    }\n}',
+    python: '# Write your code here...\n'
 };
 
 function CodeWorkspace() {
@@ -16,7 +16,7 @@ function CodeWorkspace() {
 
     // EXACT MATCH: Using 'id' so it perfectly aligns with your App.jsx route parameters
     const { contestId, challengeId } = useParams();
-
+    const [contest, setContest] = useState(null);
     const [challengeData, setChallengeData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -28,25 +28,53 @@ function CodeWorkspace() {
         setCode(BOILERPLATE_CODE[language] || BOILERPLATE_CODE.csharp);
     }, [language]);
 
+    // useEffect(() => {
+    //     const fetchChallenge = async () => {
+    //         try {
+    //             const response = await fetch(`http://localhost:5174/api/challenge/${challengeId}`);
+    //             if (response.ok) {
+    //                 const data = await response.json();
+    //                 setChallengeData(data);
+    //             } else {
+    //                 console.error("Challenge not found");
+    //             }
+    //         } catch (error) {
+    //             console.error("Failed to fetch from C# backend", error);
+    //         } finally {
+    //             setIsLoading(false);
+    //         }
+    //     };
+
+    //     fetchChallenge();
+    // }, [challengeId]);
     useEffect(() => {
-        const fetchChallenge = async () => {
+        const fetchWorkspaceData = async () => {
             try {
-                const response = await fetch(`http://localhost:5174/api/challenge/${challengeId}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    setChallengeData(data);
+                const [challengeRes, contestRes] = await Promise.all([
+                    fetch(`http://localhost:5174/api/challenge/${challengeId}`),
+                    fetch(`http://localhost:5174/api/contest/${contestId}`)
+                ]);
+
+                if (challengeRes.ok) {
+                    setChallengeData(await challengeRes.json());
                 } else {
                     console.error("Challenge not found");
                 }
+
+                if (contestRes.ok) {
+                    setContest(await contestRes.json());
+                } else {
+                    console.error("Contest not found");
+                }
             } catch (error) {
-                console.error("Failed to fetch from C# backend", error);
+                console.error("Failed to fetch workspace data", error);
             } finally {
                 setIsLoading(false);
             }
         };
 
-        fetchChallenge();
-    }, [challengeId]);
+        fetchWorkspaceData();
+    }, [challengeId, contestId]);
 
     const handleRunCode = async () => {
         setIsEvaluating(true);
@@ -114,46 +142,69 @@ function CodeWorkspace() {
     return (
         <div style={{ display: 'flex', height: '100vh', backgroundColor: '#f4f4f4' }}>
 
-            {/* LEFT SIDE: The Problem Description */}
-            <div style={{ flex: 1, padding: '30px', overflowY: 'auto', borderRight: '1px solid #ddd', backgroundColor: 'white' }}>
+            <div style={{ flex: 1, padding: '40px', overflowY: 'auto', borderRight: '1px solid #e2e8f0', backgroundColor: '#ffffff', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
 
-                {/* Updated back button to return to the specific contest instead of kicking them out of the event entirely */}
-                <button onClick={() => navigate(`/contest/${contestId}`)} style={{ marginBottom: '20px', background: 'none', border: 'none', color: '#007bff', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}>
+                <button onClick={() => navigate(`/contest/${contestId}`)} style={{ display: 'inline-flex', alignItems: 'center', marginBottom: '24px', background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: '0.9rem', padding: 0, fontWeight: '500', transition: 'color 0.2s' }}>
                     ← Back to Contest
                 </button>
 
-                <h1 style={{ marginTop: 0, marginBottom: '20px', color: '#333' }}>{challengeData.title}</h1>
-                <span style={{ padding: '4px 8px', borderRadius: '4px', backgroundColor: '#d4edda', color: '#155724', fontWeight: 'bold', fontSize: '0.85rem' }}>
-                    {challengeData.difficulty} | {challengeData.points} pts
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px', flexWrap: 'wrap' }}>
+                    <h1 style={{ margin: 0, color: '#0f172a', fontSize: '2.2rem', fontWeight: '800', letterSpacing: '-0.5px' }}>
+                        {challengeData.title}
+                    </h1>
+                    <span style={{ padding: '6px 14px', borderRadius: '999px', backgroundColor: '#dcfce7', color: '#166534', fontWeight: '700', fontSize: '0.75rem', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+                        {challengeData.difficulty} | {challengeData.points} pts
+                    </span>
+                </div>
 
-                <h3 style={{ marginTop: '30px', borderBottom: '1px solid #eee', paddingBottom: '10px' }}>Problem Statement</h3>
-                <p style={{ lineHeight: '1.6', color: '#333' }}>{challengeData.description}</p>
+                <h3 style={{ margin: '0 0 12px 0', color: '#334155', fontSize: '1.25rem', fontWeight: '700', borderBottom: '2px solid #f1f5f9', paddingBottom: '10px' }}>
+                    Problem Statement
+                </h3>
+                <p style={{ lineHeight: '1.7', color: '#475569', fontSize: '1.05rem', margin: '0 0 32px 0' }}>
+                    {challengeData.description}
+                </p>
 
-                <h3 style={{ marginTop: '30px', borderBottom: '1px solid #eee', paddingBottom: '10px' }}>Input Format</h3>
-                <p style={{ whiteSpace: 'pre-line', color: '#555', fontFamily: 'monospace', backgroundColor: '#f8f9fa', padding: '10px', borderRadius: '4px' }}>{challengeData.inputFormat}</p>
+                <h3 style={{ margin: '0 0 12px 0', color: '#334155', fontSize: '1.25rem', fontWeight: '700', borderBottom: '2px solid #f1f5f9', paddingBottom: '10px' }}>
+                    Input Format
+                </h3>
+                <p style={{ whiteSpace: 'pre-line', color: '#0f172a', fontFamily: 'Consolas, monospace', backgroundColor: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.95rem', margin: '0 0 32px 0' }}>
+                    {challengeData.inputFormat}
+                </p>
 
-                <h3 style={{ marginTop: '30px', borderBottom: '1px solid #eee', paddingBottom: '10px' }}>Output Format</h3>
-                <p style={{ whiteSpace: 'pre-line', color: '#555', fontFamily: 'monospace', backgroundColor: '#f8f9fa', padding: '10px', borderRadius: '4px' }}>{challengeData.outputFormat}</p>
+                <h3 style={{ margin: '0 0 12px 0', color: '#334155', fontSize: '1.25rem', fontWeight: '700', borderBottom: '2px solid #f1f5f9', paddingBottom: '10px' }}>
+                    Output Format
+                </h3>
+                <p style={{ whiteSpace: 'pre-line', color: '#0f172a', fontFamily: 'Consolas, monospace', backgroundColor: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.95rem', margin: '0 0 40px 0' }}>
+                    {challengeData.outputFormat}
+                </p>
+                <h3 style={{ margin: '0 0 12px 0', color: '#334155', fontSize: '1.25rem', fontWeight: '700', borderBottom: '2px solid #f1f5f9', paddingBottom: '10px' }}>
+                    Constraints
+                </h3>
+                <p style={{ whiteSpace: 'pre-line', color: '#0f172a', fontFamily: 'Consolas, monospace', backgroundColor: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.95rem', margin: '0 0 40px 0' }}>
+                    {challengeData.constraints}
+                </p>
 
-                <h3 style={{ marginTop: '30px', borderBottom: '1px solid #eee', paddingBottom: '10px' }}>
+                <h3 style={{ margin: '0 0 16px 0', color: '#334155', fontSize: '1.25rem', fontWeight: '700', borderBottom: '2px solid #f1f5f9', paddingBottom: '10px' }}>
                     Sample Test Cases
                 </h3>
 
-                {/* Dynamically loop through the visible test cases provided by C# */}
                 {challengeData.testCases && challengeData.testCases.map((tc, index) => (
-                    <div key={tc.id} style={{ display: 'flex', gap: '20px', marginTop: '20px', padding: '15px', backgroundColor: '#f8f9fa', border: '1px solid #ddd', borderRadius: '6px' }}>
+                    <div key={tc.id} style={{ display: 'flex', gap: '20px', marginBottom: '20px', padding: '20px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
 
                         <div style={{ flex: 1 }}>
-                            <h4 style={{ margin: '0 0 8px 0', color: '#555' }}>Input {index + 1}</h4>
-                            <pre style={{ backgroundColor: '#2d2d2d', color: '#fff', padding: '12px', borderRadius: '4px', margin: 0, fontFamily: 'monospace' }}>
+                            <h4 style={{ margin: '0 0 10px 0', color: '#64748b', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                Input {index + 1}
+                            </h4>
+                            <pre style={{ backgroundColor: '#ffffff', color: '#0f172a', padding: '12px 16px', borderRadius: '6px', margin: 0, fontFamily: 'Consolas, monospace', border: '1px solid #cbd5e1', fontSize: '0.95rem' }}>
                                 {tc.inputData}
                             </pre>
                         </div>
 
                         <div style={{ flex: 1 }}>
-                            <h4 style={{ margin: '0 0 8px 0', color: '#555' }}>Expected Output {index + 1}</h4>
-                            <pre style={{ backgroundColor: '#2d2d2d', color: '#fff', padding: '12px', borderRadius: '4px', margin: 0, fontFamily: 'monospace' }}>
+                            <h4 style={{ margin: '0 0 10px 0', color: '#64748b', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                Expected Output {index + 1}
+                            </h4>
+                            <pre style={{ backgroundColor: '#ffffff', color: '#0f172a', padding: '12px 16px', borderRadius: '6px', margin: 0, fontFamily: 'Consolas, monospace', border: '1px solid #cbd5e1', fontSize: '0.95rem' }}>
                                 {tc.expectedOutput}
                             </pre>
                         </div>
@@ -176,11 +227,12 @@ function CodeWorkspace() {
                         <option value="java">Java</option>
                         <option value="python">Python</option>
                     </select>
-
-                    <ContestTimer
-                        endTime="2026-12-31T23:59:00Z"
-                        onTimeUp={handleSubmitCode}
-                    />
+                    {contest && (
+                        <ContestTimer
+                            endTime={contest.endTime}
+                            onTimeUp={handleSubmitCode}
+                        />
+                    )}
 
                     <div style={{ display: 'flex', gap: '10px' }}>
                         <button
@@ -215,18 +267,32 @@ function CodeWorkspace() {
                         </button>
                     </div>
                 </div>
-
-                <div style={{ flex: 1 }}>
+                <div
+                    style={{ flex: 1 }}
+                    onCopyCapture={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }}
+                    onPasteCapture={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }}
+                    onCutCapture={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }}
+                >
+                    {/* <div style={{ flex: 1 }}> */}
                     <Editor
                         height="100%"
                         theme="vs-dark"
                         language={language}
                         value={code}
                         onChange={(newValue) => setCode(newValue)}
-                        options={{ minimap: { enabled: false }, fontSize: 16, padding: { top: 20 } }}
+                        options={{ minimap: { enabled: false }, fontSize: 16, padding: { top: 20 }, quickSuggestions: false, suggestOnTriggerCharacters: false, parameterHints: { enabled: false }, wordBasedSuggestions: 'off', snippetSuggestions: 'none' }}
                     />
+                    {/* </div> */}
                 </div>
-
                 <div style={{ padding: '20px', backgroundColor: '#1e1e1e', color: '#d4d4d4', borderTop: '1px solid #444', minHeight: '200px', overflowY: 'auto' }}>
                     <h3 style={{ color: '#888', margin: '0 0 15px 0', fontSize: '16px', textTransform: 'uppercase', letterSpacing: '1px' }}>Test Output</h3>
 
